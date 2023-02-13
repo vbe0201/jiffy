@@ -9,15 +9,11 @@ package io.github.vbe0201.jiffy.jit.decoder
 data class Instruction(val insn: UInt) {
     /**
      * Gets the [InstructionKind] for this instruction.
-     *
-     * @return The associated kind, or null for invalid data.
      */
     fun kind(): InstructionKind? = decodeKind(insn)
 
     /**
      * Gets the [FunctionKind] for this instruction.
-     *
-     * @return The associated kind, or null for invalid data.
      */
     fun function(): FunctionKind? = decodeFunction(insn)
 
