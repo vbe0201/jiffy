@@ -1,7 +1,11 @@
-fun main(args: Array<String>) {
-    println("Hello World!")
+package io.github.vbe0201.jiffy
 
-    // Try adding program arguments via Run/Debug configuration.
-    // Learn more about running applications: https://www.jetbrains.com/help/idea/running-applications.html.
-    println("Program arguments: ${args.joinToString()}")
+import io.github.vbe0201.jiffy.jit.decoder.Instruction
+
+fun main(args: Array<String>) {
+    println("${Instruction(0x8FA20010U).kind()}")
+    println("${Instruction(0U).kind()}")
+    println("${Instruction(0x2442FFFFU).kind()}")
+    println("${Instruction(0xAFA20010U).kind()}")
+    println("${Instruction(0x1443000BU).kind()}")
 }

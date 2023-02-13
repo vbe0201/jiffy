@@ -1,0 +1,47 @@
+package io.github.vbe0201.jiffy.jit.decoder
+
+/**
+ * Supported instruction types in the MIPS I ISA.
+ */
+enum class InstructionKind(val opcode: UByte) {
+    SPECIAL(0x0U),
+    B(0x1U),
+    J(0x2U),
+    JAL(0x3U),
+    BEQ(0x4U),
+    BNE(0x5U),
+    BLEZ(0x6U),
+    BGTZ(0x7U),
+    ADDI(0x8U),
+    ADDIU(0x9U),
+    SLTI(0xAU),
+    SLTIU(0xBU),
+    ANDI(0xCU),
+    ORI(0xDU),
+    XORI(0xEU),
+    LUI(0xFU),
+    COP0(0x10U),
+    COP1(0x11U),
+    COP2(0x12U),
+    COP3(0x13U),
+    LB(0x20U),
+    LH(0x21U),
+    LWL(0x22U),
+    LW(0x23U),
+    LBU(0x24U),
+    LHU(0x25U),
+    LWR(0x26U),
+    SB(0x28U),
+    SH(0x29U),
+    SWL(0x2AU),
+    SW(0x2BU),
+    SWR(0x2EU),
+    LWC0(0x30U),
+    LWC1(0x31U),
+    LWC2(0x32U),
+    LWC3(0x33U),
+    SWC0(0x38U),
+    SWC1(0x39U),
+    SWC2(0x3AU),
+    SWC3(0x3BU)
+}
