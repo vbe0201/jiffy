@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     kotlin("jvm") version "1.8.10"
     application
@@ -20,6 +22,10 @@ tasks.test {
 
 kotlin {
     jvmToolchain(19)
+}
+
+tasks.withType<KotlinCompile>().all {
+    kotlinOptions.freeCompilerArgs += "-opt-in=kotlin.ExperimentalUnsignedTypes"
 }
 
 application {

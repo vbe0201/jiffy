@@ -1,11 +1,18 @@
 package io.github.vbe0201.jiffy
 
 import io.github.vbe0201.jiffy.jit.decoder.Instruction
+import java.io.File
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 fun main(args: Array<String>) {
-    println("${Instruction(0x8FA20010U).kind()}")
-    println("${Instruction(0U).kind()}")
-    println("${Instruction(0x2442FFFFU).kind()}")
-    println("${Instruction(0xAFA20010U).kind()}")
-    println("${Instruction(0x1443000BU).kind()}")
+    // Read the BIOS image and configure ByteBuffer for reading instructions.
+    val bios = ByteBuffer.wrap(File("assets/scph1001.bin").readBytes())
+    bios.order(ByteOrder.LITTLE_ENDIAN)
+
+    for (i in 0..10) {
+        val raw = bios.getInt(i * 4).toUInt()
+        val insn = Instruction(raw)
+        println("[${i * 4}] ($raw) ${insn.kind()}")
+    }
 }
