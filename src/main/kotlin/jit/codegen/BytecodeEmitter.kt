@@ -9,7 +9,7 @@ import org.objectweb.asm.Type
 
 // The only officially supported JDK by jiffy is 19.
 // When bumping to a newer version, also change this constant.
-private const val CLASS_VERSION = 52 + 19 - 18
+private const val CLASS_VERSION = 52 + 19 - 8
 
 // Symbols for miscellaneous classes used during code generation.
 private val compiledInterface = Type.getInternalName(Compiled::class.java)
