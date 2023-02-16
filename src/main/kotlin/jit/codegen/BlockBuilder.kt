@@ -20,16 +20,16 @@ class BlockBuilder(val emitter: BytecodeEmitter) {
      * codegen to achieve semantic equivalence in emulation.
      */
     fun shouldEmit(insn: Instruction): Boolean {
-        // All-zero instructions are NOPs.
-        // We do not care about those.
-        return insn.raw == 0U
+        // All-zero instructions are NOPs. We do not care about those.
+        return insn.raw != 0U
     }
 
     /**
      * Builds a block of code out of the [ExecutionContext], starting
      * at a given address.
      *
-     * Returns the MIPS program counter at the end of the selected block.
+     * Returns the size of all MIPS instructions governed by the resulting
+     * block in bytes.
      *
      * The resulting code will be emitted to the inner [BytecodeEmitter].
      */
@@ -40,6 +40,6 @@ class BlockBuilder(val emitter: BytecodeEmitter) {
 
         this.emitter.generateUnimplementedStub()
 
-        return addr + 4U
+        return 4U
     }
 }

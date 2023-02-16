@@ -9,7 +9,7 @@ import org.objectweb.asm.Type
 
 // The only officially supported JDK by jiffy is 19.
 // When bumping to a newer version, also change this constant.
-private const val CLASS_VERSION = 52 + 19 - 8
+private const val CLASS_VERSION = Opcodes.V19
 
 // Symbols for miscellaneous classes used during code generation.
 private val compiledInterface = Type.getInternalName(Compiled::class.java)
@@ -32,26 +32,27 @@ private fun makeWriterWithProlog(): ClassWriter {
     // Generate the default constructor for every generated class.
     // This must be kept in sync with the requirements of the
     // `Compiler` class for instantiating the generated types.
-    val visitor = writer.visitMethod(
+    writer.visitMethod(
         Opcodes.ACC_PUBLIC,
         "<init>",
         "()V",
         null,
         null
     )
+        .apply {
+            visitVarInsn(Opcodes.ALOAD, 0)
+            visitMethodInsn(
+                Opcodes.INVOKESPECIAL,
+                "java/lang/Object",
+                "<init>",
+                "()V",
+                false
+            )
+            visitInsn(Opcodes.RETURN)
 
-    visitor.visitVarInsn(Opcodes.ALOAD, 0)
-    visitor.visitMethodInsn(
-        Opcodes.INVOKESPECIAL,
-        "java/lang/Object",
-        "<init>",
-        "()V",
-        false
-    )
-    visitor.visitInsn(Opcodes.RETURN)
-
-    visitor.visitMaxs(0, 0)
-    visitor.visitEnd()
+            visitMaxs(0, 0)
+            visitEnd()
+        }
 
     return writer
 }
@@ -114,31 +115,5 @@ class BytecodeEmitter {
             false
         )
         visitor.visitInsn(Opcodes.RETURN)
-    }
-
-    // Generates a default constructor for the object which basically
-    // does nothing. Note that the `Compiler` expects things to work
-    // this way, so don't make changes here without adapting there.
-    private fun generateConstructor() {
-        val visitor = this.writer.visitMethod(
-            Opcodes.ACC_PUBLIC,
-            "<init>",
-            "()V",
-            null,
-            null
-        )
-
-        visitor.visitVarInsn(Opcodes.ALOAD, 0)
-        visitor.visitMethodInsn(
-            Opcodes.INVOKESPECIAL,
-            "java/lang/Object",
-            "<init>",
-            "()V",
-            false
-        )
-        visitor.visitInsn(Opcodes.RETURN)
-
-        visitor.visitMaxs(0, 0)
-        visitor.visitEnd()
     }
 }

@@ -47,12 +47,12 @@ class Translator {
 
     private fun compileBlock(ctx: ExecutionContext, start: UInt): Block {
         val builder = BlockBuilder(BytecodeEmitter())
-        val end = builder.build(ctx, start)
+        val len = builder.build(ctx, start)
 
         return Block(
             this.compiler.compile(builder.emitter.finish()),
             start,
-            end
+            len,
         )
     }
 }

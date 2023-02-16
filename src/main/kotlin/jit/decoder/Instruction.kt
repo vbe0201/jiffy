@@ -36,7 +36,7 @@ value class Instruction(val raw: UInt) {
      * Gets the imm operand of this instruction.
      *
      * The resulting value is only valid for I form instructions and may be
-     * sign or zero extended to 32-bits, depending on the instruction.
+     * sign or zero extended to 32 bits, depending on the instruction.
      */
     fun imm(): UShort = (raw and 0xFFFFU).toUShort()
 
