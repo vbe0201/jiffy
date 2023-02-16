@@ -12,5 +12,5 @@ interface Compiled {
     /**
      * Executes this code block on the given [ExecutionContext].
      */
-    fun execute(state: ExecutionContext)
+    fun execute(context: ExecutionContext)
 }

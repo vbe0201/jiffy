@@ -13,6 +13,9 @@ repositories {
 }
 
 dependencies {
+    // https://mvnrepository.com/artifact/org.ow2.asm/asm
+    implementation("org.ow2.asm:asm:9.4")
+
     testImplementation(kotlin("test"))
 }
 

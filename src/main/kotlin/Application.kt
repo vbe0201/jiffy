@@ -1,18 +1,20 @@
 package io.github.vbe0201.jiffy
 
-import io.github.vbe0201.jiffy.jit.decoder.Instruction
+import io.github.vbe0201.jiffy.cpu.Bus
+import io.github.vbe0201.jiffy.jit.state.ExecutionContext
+import io.github.vbe0201.jiffy.jit.translation.Translator
 import java.io.File
 import java.nio.ByteBuffer
-import java.nio.ByteOrder
 
 fun main(args: Array<String>) {
-    // Read the BIOS image and configure ByteBuffer for reading instructions.
+    // Read the BIOS image and construct the CPU bus from it.
     val bios = ByteBuffer.wrap(File("assets/scph1001.bin").readBytes())
-    bios.order(ByteOrder.LITTLE_ENDIAN)
+    val bus = Bus(bios)
 
-    for (i in 0..10) {
-        val raw = bios.getInt(i * 4).toUInt()
-        val insn = Instruction(raw)
-        println("[${i * 4}] ($raw) ${insn.kind()}")
-    }
+    // Construct the JIT state.
+    val context = ExecutionContext(bus)
+    val translator = Translator()
+
+    // Run the JIT until the program is done.
+    translator.execute(context)
 }
