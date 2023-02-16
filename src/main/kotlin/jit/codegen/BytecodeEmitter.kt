@@ -2,6 +2,7 @@ package io.github.vbe0201.jiffy.jit.codegen
 
 import io.github.vbe0201.jiffy.jit.state.ExecutionContext
 import io.github.vbe0201.jiffy.jit.translation.Compiled
+import io.github.vbe0201.jiffy.jit.translation.Compiler
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
@@ -10,14 +11,9 @@ import org.objectweb.asm.Type
 // When bumping to a newer version, also change this constant.
 private const val CLASS_VERSION = 52 + 19 - 18
 
-// The name of every generated class. Since we're loading classes
-// anonymously into the JVM at runtime, we're not concerned about
-// their names and just go with something that saves us cost.
-private const val GENERATED_CLASS =
-    "io/github/vbe0201/jiffy/jit/translation/EmittedBlockImpl"
-
 // Symbols for miscellaneous classes used during code generation.
 private val compiledInterface = Type.getInternalName(Compiled::class.java)
+private val compilerClass = Type.getInternalName(Compiler::class.java)
 private val contextClass = Type.getInternalName(ExecutionContext::class.java)
 
 private fun makeWriterWithProlog(): ClassWriter {
@@ -27,7 +23,7 @@ private fun makeWriterWithProlog(): ClassWriter {
     writer.visit(
         CLASS_VERSION,
         Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER,
-        GENERATED_CLASS,
+        "$compilerClass\$BlockImpl",
         null,
         "java/lang/Object",
         arrayOf(compiledInterface)
