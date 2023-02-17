@@ -1,7 +1,83 @@
 package io.github.vbe0201.jiffy.jit.codegen
 
+import io.github.vbe0201.jiffy.jit.codegen.impl.unimplemented
 import io.github.vbe0201.jiffy.jit.decoder.Instruction
 import io.github.vbe0201.jiffy.jit.state.ExecutionContext
+import kotlin.system.exitProcess
+
+private val handlerTable = arrayOf(
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+).also { check(it.size == 64) }
 
 /**
  * Wraps a [BytecodeEmitter] and emits blocks of code to it.
@@ -39,12 +115,26 @@ class BlockBuilder(
      * The resulting code will be emitted to the inner [BytecodeEmitter].
      */
     fun build(context: ExecutionContext, addr: UInt): UInt {
-        // TODO: Do this properly.
-        val insn = context.bus.readInstruction(addr)
-        println("Translating instruction ${insn.kind()}")
+        var offset = 0U
 
-        this.emitter.generateUnimplementedStub()
+        var blockOpen = true
+        while (blockOpen) {
+            val insn = context.bus.readInstruction(addr + offset)
 
-        return 4U
+            // Emit the instruction implementation.
+            if (shouldEmit(insn)) {
+                // TODO: Figure out a nicer way to handle invalid instructions.
+                val kind = insn.kind() ?: exitProcess(1)
+
+                // Find the handler for the instruction and invoke it.
+                val handler = handlerTable[kind.opcode.toInt()]
+                blockOpen = handler(addr + offset, insn, this.emitter)
+            }
+
+            // Advance the offset from the original address by one instruction.
+            offset += UInt.SIZE_BYTES.toUInt()
+        }
+
+        return offset
     }
 }

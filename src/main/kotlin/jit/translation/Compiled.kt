@@ -8,7 +8,7 @@ import io.github.vbe0201.jiffy.jit.state.ExecutionContext
  * Implementors of [Compiled] are usually generated from raw Java Bytecode
  * built by the translator and loaded as an accessible class at runtime.
  */
-interface Compiled {
+fun interface Compiled {
     /**
      * Executes this code block on the given [ExecutionContext].
      */
