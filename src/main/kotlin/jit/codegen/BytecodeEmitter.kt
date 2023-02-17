@@ -17,8 +17,6 @@ private val compiledInterface = Type.getInternalName(Compiled::class.java)
 private val compilerClass = Type.getInternalName(Compiler::class.java)
 private val contextClass = Type.getInternalName(ExecutionContext::class.java)
 
-private val gprArray = Type.getInternalName(UIntArray::class.java)
-
 private fun makeWriterWithPrologue(): ClassWriter {
     val writer = ClassWriter(ClassWriter.COMPUTE_MAXS)
 
@@ -121,7 +119,7 @@ class BytecodeEmitter {
 
             iconst(index.toInt())
             iconst(value.toInt())
-            invokestatic(gprArray, "set-VXSXFK8", "([III)V", false)
+            visitInsn(IASTORE)
         }
     }
 
