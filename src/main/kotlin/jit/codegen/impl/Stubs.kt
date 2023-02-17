@@ -14,6 +14,8 @@ fun unimplemented(
     insn: Instruction,
     emitter: BytecodeEmitter
 ): Boolean {
+    println("Unimplemented instruction: ${insn.kind()}")
+
     emitter.generateUnimplementedStub()
     return false
 }

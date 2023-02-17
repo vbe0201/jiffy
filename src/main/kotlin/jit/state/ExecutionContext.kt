@@ -22,11 +22,30 @@ class ExecutionContext(
     var state = State.INITIAL
 
     /**
+     * The general-purpose register for the CPU.
+     */
+    @get:JvmName("getGprs")
+    var gprs = UIntArray(32) { 0U }
+        private set
+
+    /**
      * The special-purpose program counter register.
      *
      * Hard-wired to start at the first BIOS instruction.
      */
     val pc = BIOS_START
+
+    /**
+     * The special-purpose register which holds the high 32 bits of
+     * multiplication result; remainder of division.
+     */
+    val hi = 0U
+
+    /**
+     * The special-purpose register which holds the low 32 bits of
+     * multiplication result; quotient of division.
+     */
+    val lo = 0U
 
     /**
      * Reads the next [Instruction] from the current program counter.

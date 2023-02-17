@@ -1,6 +1,6 @@
 package io.github.vbe0201.jiffy.jit.codegen
 
-import io.github.vbe0201.jiffy.jit.codegen.impl.unimplemented
+import io.github.vbe0201.jiffy.jit.codegen.impl.*
 import io.github.vbe0201.jiffy.jit.decoder.Instruction
 import io.github.vbe0201.jiffy.jit.state.ExecutionContext
 import kotlin.system.exitProcess
@@ -22,7 +22,7 @@ private val handlerTable = arrayOf(
     ::unimplemented,
     ::unimplemented,
     ::unimplemented,
-    ::unimplemented,
+    ::lui,
 
     ::unimplemented,
     ::unimplemented,

@@ -3,18 +3,21 @@ package io.github.vbe0201.jiffy.jit.codegen
 import io.github.vbe0201.jiffy.jit.state.ExecutionContext
 import io.github.vbe0201.jiffy.jit.translation.Compiled
 import io.github.vbe0201.jiffy.jit.translation.Compiler
+import org.objectweb.asm.commons.InstructionAdapter
 import org.objectweb.asm.ClassWriter
-import org.objectweb.asm.Opcodes
+import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.Type
 
 // The only officially supported JDK by jiffy is 19.
 // When bumping to a newer version, also change this constant.
-private const val CLASS_VERSION = Opcodes.V19
+private const val CLASS_VERSION = V19
 
 // Symbols for miscellaneous classes used during code generation.
 private val compiledInterface = Type.getInternalName(Compiled::class.java)
 private val compilerClass = Type.getInternalName(Compiler::class.java)
 private val contextClass = Type.getInternalName(ExecutionContext::class.java)
+
+private val gprArray = Type.getInternalName(UIntArray::class.java)
 
 private fun makeWriterWithPrologue(): ClassWriter {
     val writer = ClassWriter(ClassWriter.COMPUTE_MAXS)
@@ -22,7 +25,7 @@ private fun makeWriterWithPrologue(): ClassWriter {
     // Start the new class to generate.
     writer.visit(
         CLASS_VERSION,
-        Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER,
+        ACC_PUBLIC + ACC_SUPER,
         "$compilerClass\$BlockImpl",
         null,
         "java/lang/Object",
@@ -33,22 +36,22 @@ private fun makeWriterWithPrologue(): ClassWriter {
     // This must be kept in sync with the requirements of the
     // `Compiler` class for instantiating the generated types.
     writer.visitMethod(
-        Opcodes.ACC_PUBLIC,
+        ACC_PUBLIC,
         "<init>",
         "()V",
         null,
         null
     )
         .apply {
-            visitVarInsn(Opcodes.ALOAD, 0)
+            visitVarInsn(ALOAD, 0)
             visitMethodInsn(
-                Opcodes.INVOKESPECIAL,
+                INVOKESPECIAL,
                 "java/lang/Object",
                 "<init>",
                 "()V",
                 false
             )
-            visitInsn(Opcodes.RETURN)
+            visitInsn(RETURN)
 
             visitMaxs(0, 0)
             visitEnd()
@@ -76,12 +79,14 @@ class BytecodeEmitter {
     // Since Kotlin guarantees initialization order of properties,
     // the very next thing for us to do is to start the generation
     // of the `Compiled.execute` implementation.
-    private var visitor = this.writer.visitMethod(
-        Opcodes.ACC_PUBLIC,
-        "execute",
-        "(L$contextClass;)V",
-        null,
-        null
+    private var visitor = InstructionAdapter(
+        this.writer.visitMethod(
+            ACC_PUBLIC,
+            "execute",
+            "(L$contextClass;)V",
+            null,
+            null
+        )
     )
 
     /**
@@ -92,7 +97,7 @@ class BytecodeEmitter {
      */
     fun finish(): ByteArray {
         // Finish the implementation of `Compiled.execute`.
-        this.visitor.visitInsn(Opcodes.RETURN)
+        this.visitor.visitInsn(RETURN)
         this.visitor.visitMaxs(0, 0)
         this.visitor.visitEnd()
 
@@ -103,17 +108,31 @@ class BytecodeEmitter {
     }
 
     /**
+     * Sets the general-purpose register for the given index to
+     * a new value.
+     *
+     * The caller must ensure the given register index is in a
+     * valid range.
+     */
+    fun setGpr(index: UInt, value: UInt) {
+        this.visitor.apply {
+            visitVarInsn(ALOAD, 1)
+            invokevirtual(contextClass, "getGprs", "()[I", false)
+
+            iconst(index.toInt())
+            iconst(value.toInt())
+            invokestatic(gprArray, "set-VXSXFK8", "([III)V", false)
+        }
+    }
+
+    /**
      * Emits a call to [ExecutionContext.unimplemented] into the
      * implementation of the generated class.
      */
     fun generateUnimplementedStub() {
-        this.visitor.visitVarInsn(Opcodes.ALOAD, 1)
-        this.visitor.visitMethodInsn(
-            Opcodes.INVOKEVIRTUAL,
-            contextClass,
-            "unimplemented",
-            "()V",
-            false
-        )
+        this.visitor.apply {
+            visitVarInsn(ALOAD, 1)
+            invokevirtual(contextClass, "unimplemented", "()V", false)
+        }
     }
 }
