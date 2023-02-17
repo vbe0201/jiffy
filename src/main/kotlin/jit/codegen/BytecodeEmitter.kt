@@ -95,14 +95,17 @@ class BytecodeEmitter {
      */
     fun finish(): ByteArray {
         // Finish the implementation of `Compiled.execute`.
-        this.visitor.visitInsn(RETURN)
-        this.visitor.visitMaxs(0, 0)
-        this.visitor.visitEnd()
+        this.visitor.run {
+            visitInsn(RETURN)
+            visitMaxs(0, 0)
+            visitEnd()
+        }
 
         // Finish the implementation of the generated class.
-        this.writer.visitEnd()
-
-        return this.writer.toByteArray()
+        return this.writer.run {
+            visitEnd()
+            toByteArray()
+        }
     }
 
     /**
@@ -113,7 +116,7 @@ class BytecodeEmitter {
      * valid range.
      */
     fun setGpr(index: UInt, value: UInt) {
-        this.visitor.apply {
+        this.visitor.run {
             visitVarInsn(ALOAD, 1)
             invokevirtual(contextClass, "getGprs", "()[I", false)
 
@@ -128,7 +131,7 @@ class BytecodeEmitter {
      * implementation of the generated class.
      */
     fun generateUnimplementedStub() {
-        this.visitor.apply {
+        this.visitor.run {
             visitVarInsn(ALOAD, 1)
             invokevirtual(contextClass, "unimplemented", "()V", false)
         }
