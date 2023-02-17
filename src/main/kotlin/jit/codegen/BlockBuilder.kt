@@ -12,7 +12,12 @@ import io.github.vbe0201.jiffy.jit.state.ExecutionContext
  * After code has been emitted, [BytecodeEmitter.finish] may be
  * called on the underlying object.
  */
-class BlockBuilder(val emitter: BytecodeEmitter) {
+class BlockBuilder(
+    /**
+     * The [BytecodeEmitter] to populate.
+     */
+    val emitter: BytecodeEmitter
+) {
     /**
      * Indicates whether an [Instruction] should be emitted.
      *
@@ -35,8 +40,8 @@ class BlockBuilder(val emitter: BytecodeEmitter) {
      */
     fun build(context: ExecutionContext, addr: UInt): UInt {
         // TODO: Do this properly.
-        val insn = context.bus.readInstruction(addr).kind()
-        println("Translating instruction $insn")
+        val insn = context.bus.readInstruction(addr)
+        println("Translating instruction ${insn.kind()}")
 
         this.emitter.generateUnimplementedStub()
 

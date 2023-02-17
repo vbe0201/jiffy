@@ -27,9 +27,9 @@ class BlockCache {
         var left: BlockNode? = null
         var right: BlockNode? = null
 
-        var start: UInt = block.start
-        var end: UInt = block.start + block.len
-        var max: UInt = block.start + block.len
+        var start = block.start
+        var end = block.start + block.len
+        var max = block.start + block.len
     }
 
     private var root: BlockNode? = null
@@ -44,8 +44,8 @@ class BlockCache {
      * Clears the cache, removing all elements from it.
      */
     fun clear() {
-        root = null
-        count = 0U
+        this.root = null
+        this.count = 0U
     }
 
     /**
@@ -85,7 +85,7 @@ class BlockCache {
      * Removes the entry for a given address from the cache, if present.
      */
     fun remove(addr: UInt) {
-        count -= bstRemove(addr)
+        this.count -= bstRemove(addr)
     }
 
     /**
@@ -94,7 +94,7 @@ class BlockCache {
      */
     fun getOverlaps(addr: UInt, size: UInt): List<UInt> {
         val list = emptyList<UInt>().toMutableList()
-        getKeys(root, addr, addr + size, list)
+        getKeys(this.root, addr, addr + size, list)
         return list
     }
 
@@ -103,7 +103,7 @@ class BlockCache {
      */
     fun asList(): List<Block> {
         val list = ArrayList<Block>(this.count.toInt())
-        addToList(root, list)
+        addToList(this.root, list)
         return list
     }
 
@@ -195,7 +195,7 @@ class BlockCache {
     }
 
     private fun getNode(key: UInt): BlockNode? {
-        var node = root
+        var node = this.root
         while (node != null) {
             node = if (key < node.start) {
                 node.left
@@ -214,7 +214,7 @@ class BlockCache {
         update: ((UInt, Block) -> Block)?
     ) {
         var parent: BlockNode? = null
-        var node: BlockNode? = root
+        var node: BlockNode? = this.root
 
         while (node != null) {
             parent = node
@@ -247,7 +247,7 @@ class BlockCache {
 
         val newNode = BlockNode(block, parent)
         if (newNode.parent == null) {
-            root = newNode
+            this.root = newNode
         } else if (newNode.start < parent!!.start) {
             parent.left = newNode
         } else {
@@ -255,7 +255,7 @@ class BlockCache {
         }
 
         propagateIncrease(newNode)
-        ++count
+        ++this.count
         restoreBalanceAfterInsertion(newNode)
     }
 
@@ -275,7 +275,7 @@ class BlockCache {
         }
 
         if (parentOf(replacementNode) == null) {
-            root = tmp
+            this.root = tmp
         } else if (replacementNode == leftOf(parentOf(replacementNode))) {
             parentOf(replacementNode)!!.left = tmp
         } else {
@@ -336,7 +336,7 @@ class BlockCache {
 
             right!!.parent = nodeParent
             if (nodeParent == null) {
-                root = right
+                this.root = right
             } else if (node == leftOf(nodeParent)) {
                 nodeParent.left = right
             } else {
@@ -363,7 +363,7 @@ class BlockCache {
 
             left!!.parent = nodeParent
             if (nodeParent == null) {
-                root = left
+                this.root = left
             } else if (node == rightOf(nodeParent)) {
                 nodeParent.right = left
             } else {
@@ -381,7 +381,7 @@ class BlockCache {
         setColor(balance, RED)
 
         var ptr = balance
-        while (ptr != null && ptr != root && colorOf(parentOf(ptr)) == RED) {
+        while (ptr != null && ptr != this.root && colorOf(parentOf(ptr)) == RED) {
             if (parentOf(balance) == leftOf(parentOf(parentOf(ptr)))) {
                 val sibling = rightOf(parentOf(parentOf(ptr)))
 
@@ -421,12 +421,12 @@ class BlockCache {
             }
         }
 
-        setColor(root, BLACK)
+        setColor(this.root, BLACK)
     }
 
     private fun restoreBalanceAfterRemoval(balance: BlockNode?) {
         var ptr = balance
-        while (ptr != root && colorOf(ptr) == BLACK) {
+        while (ptr != this.root && colorOf(ptr) == BLACK) {
             if (ptr == leftOf(parentOf(ptr))) {
                 var sibling = rightOf(parentOf(ptr))
 
@@ -453,7 +453,7 @@ class BlockCache {
                     setColor(rightOf(sibling), BLACK)
                     rotateLeft(parentOf(ptr))
 
-                    ptr = root
+                    ptr = this.root
                 }
             } else {
                 var sibling = leftOf(parentOf(ptr))
@@ -481,7 +481,7 @@ class BlockCache {
                     setColor(leftOf(sibling), BLACK)
                     rotateRight(parentOf(ptr))
 
-                    ptr = root
+                    ptr = this.root
                 }
             }
         }

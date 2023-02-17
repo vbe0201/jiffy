@@ -16,7 +16,7 @@ private val compiledInterface = Type.getInternalName(Compiled::class.java)
 private val compilerClass = Type.getInternalName(Compiler::class.java)
 private val contextClass = Type.getInternalName(ExecutionContext::class.java)
 
-private fun makeWriterWithProlog(): ClassWriter {
+private fun makeWriterWithPrologue(): ClassWriter {
     val writer = ClassWriter(ClassWriter.COMPUTE_MAXS)
 
     // Start the new class to generate.
@@ -71,7 +71,7 @@ private fun makeWriterWithProlog(): ClassWriter {
 class BytecodeEmitter {
     // An `ClassWriter` which is configured to write a new class
     // implementing the `Compiled` interface with empty constructor.
-    private val writer = makeWriterWithProlog()
+    private val writer = makeWriterWithPrologue()
 
     // Since Kotlin guarantees initialization order of properties,
     // the very next thing for us to do is to start the generation
@@ -92,6 +92,7 @@ class BytecodeEmitter {
      */
     fun finish(): ByteArray {
         // Finish the implementation of `Compiled.execute`.
+        this.visitor.visitInsn(Opcodes.RETURN)
         this.visitor.visitMaxs(0, 0)
         this.visitor.visitEnd()
 
@@ -106,14 +107,13 @@ class BytecodeEmitter {
      * implementation of the generated class.
      */
     fun generateUnimplementedStub() {
-        visitor.visitVarInsn(Opcodes.ALOAD, 1)
-        visitor.visitMethodInsn(
+        this.visitor.visitVarInsn(Opcodes.ALOAD, 1)
+        this.visitor.visitMethodInsn(
             Opcodes.INVOKEVIRTUAL,
             contextClass,
             "unimplemented",
             "()V",
             false
         )
-        visitor.visitInsn(Opcodes.RETURN)
     }
 }
