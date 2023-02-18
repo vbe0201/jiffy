@@ -2,6 +2,7 @@ package io.github.vbe0201.jiffy.jit.state
 
 import io.github.vbe0201.jiffy.cpu.BIOS_START
 import io.github.vbe0201.jiffy.cpu.Bus
+import io.github.vbe0201.jiffy.jit.decoder.INSTRUCTION_SIZE
 import io.github.vbe0201.jiffy.jit.decoder.Instruction
 
 /**
@@ -29,11 +30,13 @@ class ExecutionContext(
         private set
 
     /**
-     * The special-purpose program counter register.
+     * The special-purpose program counter register where the next
+     * instruction should be fetched.
      *
      * Hard-wired to start at the first BIOS instruction.
      */
-    val pc = BIOS_START
+    @set:JvmName("setPc")
+    var pc = BIOS_START
 
     /**
      * The special-purpose register which holds the high 32 bits of
@@ -67,10 +70,13 @@ class ExecutionContext(
     }
 
     /**
-     * Reads the next [Instruction] from the current program counter.
+     * Fetches the next instruction from the current program counter and
+     * returns it as a [Pair] of address and [Instruction].
      */
-    fun readNextInstruction(): Instruction {
-        return this.bus.readInstruction(this.pc)
+    fun fetchNextInstruction(): Pair<UInt, Instruction> {
+        val current = this.pc to this.bus.readInstruction(this.pc)
+        this.pc += INSTRUCTION_SIZE
+        return current
     }
 
     /**

@@ -1,6 +1,7 @@
 package io.github.vbe0201.jiffy.jit.codegen
 
 import io.github.vbe0201.jiffy.jit.codegen.impl.*
+import io.github.vbe0201.jiffy.jit.decoder.INSTRUCTION_SIZE
 import io.github.vbe0201.jiffy.jit.decoder.Instruction
 import io.github.vbe0201.jiffy.jit.state.ExecutionContext
 import kotlin.system.exitProcess
@@ -8,7 +9,7 @@ import kotlin.system.exitProcess
 private val handlerTable = arrayOf(
     ::unimplemented,
     ::unimplemented,
-    ::unimplemented,
+    ::j,
     ::unimplemented,
     ::unimplemented,
     ::unimplemented,
@@ -100,9 +101,30 @@ class BlockBuilder(
      * This is a shortcut to filter out instructions that do not require
      * codegen to achieve semantic equivalence in emulation.
      */
-    fun shouldEmit(insn: Instruction): Boolean {
+    private fun shouldEmit(insn: Instruction): Boolean {
         // All-zero instructions are NOPs. We do not care about those.
         return insn.raw != 0U
+    }
+
+    /**
+     * Fetches the next [Instruction] from the given [ExecutionContext]
+     * and adds it to the block of generated code.
+     *
+     * Returns the translation [Status] of the instruction.
+     */
+    private fun addInstruction(context: ExecutionContext): Status {
+        val (addr, insn) = context.fetchNextInstruction()
+
+        if (shouldEmit(insn)) {
+            // TODO: Figure out a nicer way to handle invalid instructions.
+            val kind = insn.kind() ?: exitProcess(1)
+
+            // Find the handler for the instruction and invoke it.
+            val handler = handlerTable[kind.opcode.toInt()]
+            return handler(addr, insn, this.emitter)
+        }
+
+        return Status.CONTINUE_BLOCK
     }
 
     /**
@@ -114,27 +136,26 @@ class BlockBuilder(
      *
      * The resulting code will be emitted to the inner [BytecodeEmitter].
      */
-    fun build(context: ExecutionContext, addr: UInt): UInt {
-        var offset = 0U
+    fun build(context: ExecutionContext): UInt {
+        var processed = 0U
 
-        var blockOpen = true
-        while (blockOpen) {
-            val insn = context.bus.readInstruction(addr + offset)
-
-            // Emit the instruction implementation.
-            if (shouldEmit(insn)) {
-                // TODO: Figure out a nicer way to handle invalid instructions.
-                val kind = insn.kind() ?: exitProcess(1)
-
-                // Find the handler for the instruction and invoke it.
-                val handler = handlerTable[kind.opcode.toInt()]
-                blockOpen = handler(addr + offset, insn, this.emitter)
-            }
-
-            // Advance the offset from the original address by one instruction.
-            offset += UInt.SIZE_BYTES.toUInt()
+        // Emit more instructions until the block is complete.
+        var status = Status.CONTINUE_BLOCK
+        while (status == Status.CONTINUE_BLOCK) {
+            status = addInstruction(context)
+            processed += INSTRUCTION_SIZE
         }
 
-        return offset
+        // Check if we need to emit an additional instruction
+        // for the pipeline delay slot after a branch.
+        //
+        // NOTE: Multiple consecutive branches are forbidden
+        // by the MIPS manual, so we don't need to handle this.
+        if (status == Status.FILL_DELAY_SLOT) {
+            addInstruction(context)
+            processed += INSTRUCTION_SIZE
+        }
+
+        return processed
     }
 }

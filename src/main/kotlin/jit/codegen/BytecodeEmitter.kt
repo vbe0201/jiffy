@@ -157,6 +157,21 @@ class BytecodeEmitter {
     }
 
     /**
+     * Emits a branch in the emulated software, which sets the program
+     * counter to a new location.
+     *
+     * The given operation is responsible for placing the new program
+     * counter value on the operand stack.
+     */
+    fun branch(op: BytecodeEmitter.() -> Unit) {
+        this.visitor.run {
+            visitVarInsn(ALOAD, 1)
+            op()
+            invokevirtual(contextClass, "setPc", "(I)V", false)
+        }
+    }
+
+    /**
      * Pushes a given value on the operand stack.
      */
     fun push(value: UInt) {
@@ -164,23 +179,49 @@ class BytecodeEmitter {
     }
 
     /**
-     * Adds a given value to an operand on the stack and leaves the
-     * result on the stack.
+     * Adds two values on the operand stack and leaves the result
+     * on top of the stack.
+     *
+     * An optional immediate value may be pushed to the stack
+     * before the operation, when supplied.
      */
-    fun iadd(value: UInt) {
+    fun iadd(value: UInt?) {
         this.visitor.run {
-            iconst(value.toInt())
+            if (value != null) {
+                iconst(value.toInt())
+            }
             visitInsn(IADD)
         }
     }
 
     /**
-     * Bitwise ORs a value on the stack with a given value and leaves
-     * the result on the stack.
+     * Bitwise ANDs two values on the operand stack and leaves the
+     * result on top of the stack.
+     *
+     * An optional immediate value may be pushed to the stack
+     * before the operation, when supplied.
      */
-    fun ior(value: UInt) {
+    fun iand(value: UInt?) {
         this.visitor.run {
-            iconst(value.toInt())
+            if (value != null) {
+                iconst(value.toInt())
+            }
+            visitInsn(IAND)
+        }
+    }
+
+    /**
+     * Bitwise ORs two values on the operand stack and leaves the
+     * result on top of the stack.
+     *
+     * An optional immediate value may be pushed to the stack
+     * before the operation, when supplied.
+     */
+    fun ior(value: UInt?) {
+        this.visitor.run {
+            if (value != null) {
+                iconst(value.toInt())
+            }
             visitInsn(IOR)
         }
     }

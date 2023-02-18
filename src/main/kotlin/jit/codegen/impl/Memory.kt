@@ -1,6 +1,7 @@
 package io.github.vbe0201.jiffy.jit.codegen.impl
 
 import io.github.vbe0201.jiffy.jit.codegen.BytecodeEmitter
+import io.github.vbe0201.jiffy.jit.codegen.Status
 import io.github.vbe0201.jiffy.jit.decoder.Instruction
 import io.github.vbe0201.jiffy.utils.signExtend32
 
@@ -8,7 +9,7 @@ import io.github.vbe0201.jiffy.utils.signExtend32
  * Generates the Store Word (SW) instruction to the code buffer.
  */
 @Suppress("UNUSED_PARAMETER")
-fun sw(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Boolean {
+fun sw(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
     emitter.writeBus32 {
         // Compute the memory address to write to.
         getGpr(insn.rs())
@@ -18,5 +19,5 @@ fun sw(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Boolean {
         getGpr(insn.rt())
     }
 
-    return true
+    return Status.CONTINUE_BLOCK
 }

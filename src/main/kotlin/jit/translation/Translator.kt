@@ -29,25 +29,27 @@ class Translator {
         context.state = State.RUNNING
 
         while (context.state == State.RUNNING) {
-            val block = findOrCompileBlock(context, context.pc)
+            val block = findOrCompileBlock(context)
             block.code.execute(context)
         }
     }
 
-    private fun findOrCompileBlock(ctx: ExecutionContext, addr: UInt): Block {
-        var block = this.cache.get(addr)
+    private fun findOrCompileBlock(ctx: ExecutionContext): Block {
+        var block = this.cache.get(ctx.pc)
 
         if (block == null) {
-            block = compileBlock(ctx, addr)
+            block = compileBlock(ctx)
             this.cache.insert(block)
         }
 
         return block
     }
 
-    private fun compileBlock(ctx: ExecutionContext, start: UInt): Block {
+    private fun compileBlock(ctx: ExecutionContext): Block {
         val builder = BlockBuilder(BytecodeEmitter())
-        val len = builder.build(ctx, start)
+
+        val start = ctx.pc
+        val len = builder.build(ctx)
 
         return Block(
             this.compiler.compile(builder.emitter.finish()),

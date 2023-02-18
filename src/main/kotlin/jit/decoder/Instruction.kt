@@ -1,6 +1,11 @@
 package io.github.vbe0201.jiffy.jit.decoder
 
 /**
+ * The amount of bytes an [Instruction] consumes.
+ */
+const val INSTRUCTION_SIZE = 4U
+
+/**
  * Representation of a 32-bit MIPS instruction.
  *
  * This type wraps the raw data and provides various convenience methods
@@ -39,6 +44,20 @@ value class Instruction(val raw: UInt) {
      * sign or zero extended to 32 bits, depending on the instruction.
      */
     fun imm(): UShort = (raw and 0xFFFFU).toUShort()
+
+    /**
+     * Extracts the coprocessor opcode of this instruction.
+     *
+     * The resulting value is only valid for coprocessor instructions.
+     */
+    fun copOpcode(): UInt = (raw shr 21) and 0x1FU
+
+    /**
+     * Gets the imm25 operand of this instruction.
+     *
+     * The resulting value is only valid for coprocessor instructions.
+     */
+    fun imm25(): UInt = raw and 0x1FF_FFFFU
 
     /**
      * Extracts the rd operand of this instruction.
