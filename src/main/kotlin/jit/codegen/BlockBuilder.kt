@@ -6,8 +6,95 @@ import io.github.vbe0201.jiffy.jit.decoder.Instruction
 import io.github.vbe0201.jiffy.jit.state.ExecutionContext
 import kotlin.system.exitProcess
 
-private val handlerTable = arrayOf(
+private fun function(
+    pc: UInt,
+    insn: Instruction,
+    emitter: BytecodeEmitter
+): Status {
+    // TODO: Figure out a more elegant way to handle invalid instructions.
+    val func = insn.function() ?: exitProcess(1)
+
+    // Delegate to the corresponding entry in the functions table.
+    val handler = functionTable[func.opcode.toInt()]
+    return handler(pc, insn, emitter)
+}
+
+private val functionTable = arrayOf(
     ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::or,
+    ::unimplemented,
+    ::unimplemented,
+
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+    ::unimplemented,
+).also { check(it.size == 64) }
+
+private val handlerTable = arrayOf(
+    ::function,
     ::unimplemented,
     ::j,
     ::unimplemented,

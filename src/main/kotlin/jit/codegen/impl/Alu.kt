@@ -46,3 +46,17 @@ fun ori(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
 
     return Status.CONTINUE_BLOCK
 }
+
+/**
+ * Generates the OR instruction to the code buffer.
+ */
+@Suppress("UNUSED_PARAMETER")
+fun or(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+    emitter.setGpr(insn.rd()) {
+        getGpr(insn.rs())
+        getGpr(insn.rt())
+        ior(null)
+    }
+
+    return Status.CONTINUE_BLOCK
+}
