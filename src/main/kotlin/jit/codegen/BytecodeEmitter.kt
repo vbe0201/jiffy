@@ -122,23 +122,6 @@ class BytecodeEmitter {
         }
     }
 
-    /*
-       6: aload_1
-       7: invokevirtual #29                 // Method ExecutionContext."getGprs--hP7Qyg":()[I
-      10: bipush        6
-
-      12: aload_1
-      13: invokevirtual #29                 // Method ExecutionContext."getGprs--hP7Qyg":()[I
-      16: iconst_0
-      17: invokestatic  #35                 // Method kotlin/UIntArray."get-pVg5ArA":([II)I
-
-      20: iconst_5
-      21: ior
-
-      22: invokestatic  #41                 // Method kotlin/UInt."constructor-impl":(I)I
-      25: invokestatic  #45                 // Method kotlin/UIntArray."set-VXSXFK8":([III)V
-     */
-
     /**
      * Sets the general-purpose register for the given index to
      * a new value.
@@ -158,10 +141,37 @@ class BytecodeEmitter {
     }
 
     /**
+     * Writes a 32-bit value to a given address through the CPU bus.
+     *
+     * The given operation is responsible for placing two integer
+     * values addr, value on the stack in this order.
+     *
+     * A call to [ExecutionContext.write32] will then be emitted.
+     */
+    fun writeBus32(op: BytecodeEmitter.() -> Unit) {
+        this.visitor.run {
+            visitVarInsn(ALOAD, 1)
+            op()
+            invokevirtual(contextClass, "write32", "(II)V", false)
+        }
+    }
+
+    /**
      * Pushes a given value on the operand stack.
      */
     fun push(value: UInt) {
         this.visitor.iconst(value.toInt())
+    }
+
+    /**
+     * Adds a given value to an operand on the stack and leaves the
+     * result on the stack.
+     */
+    fun iadd(value: UInt) {
+        this.visitor.run {
+            iconst(value.toInt())
+            visitInsn(IADD)
+        }
     }
 
     /**

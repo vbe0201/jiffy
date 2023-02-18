@@ -25,22 +25,36 @@ class Bus(private val bios: ByteBuffer) {
         assert(bios.remaining() == BIOS_SIZE) { "Invalid BIOS image supplied!" }
     }
 
+    private fun readBios(addr: UInt): UInt {
+        val offset = (addr - BIOS_START).toInt()
+        return this.bios.getInt(offset).toUInt()
+    }
+
     /**
      * Reads an [Instruction] from the given memory address.
      */
     fun readInstruction(addr: UInt): Instruction {
-        return Instruction(read32(addr).toUInt())
+        return Instruction(read32(addr))
     }
 
     /**
      * Reads a 32-bit value from the given memory address in little-endian
      * byte ordering.
      */
-    fun read32(addr: UInt): Int {
+    fun read32(addr: UInt): UInt {
         return when (addr) {
-            in BIOS_START..BIOS_END -> this.bios.getInt((addr - BIOS_START).toInt())
+            in BIOS_START..BIOS_END -> readBios(addr)
 
             else -> TODO("[$addr] Memory read not yet implemented")
         }
+    }
+
+    /**
+     * Writes a 32-bit value to a given memory address in little-endian
+     * byte ordering.
+     */
+    fun write32(addr: UInt, value: UInt) {
+        // TODO
+        println("write32(0x${addr.toString(16)}, 0x${value.toString(16)})")
     }
 }

@@ -48,6 +48,25 @@ class ExecutionContext(
     val lo = 0U
 
     /**
+     * Reads a 32-bit value from the given memory address through
+     * the CPU bus.
+     */
+    fun read32(addr: UInt): UInt {
+        // TODO: Alignment check.
+        return this.bus.read32(addr)
+    }
+
+    /**
+     * Writes a 32-bit value to a given memory address thorugh the
+     * CPU bus.
+     */
+    @JvmName("write32")
+    fun write32(addr: UInt, value: UInt) {
+        // TODO: Alignment check.
+        this.bus.write32(addr, value)
+    }
+
+    /**
      * Reads the next [Instruction] from the current program counter.
      */
     fun readNextInstruction(): Instruction {

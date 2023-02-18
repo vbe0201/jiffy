@@ -2,6 +2,7 @@ package io.github.vbe0201.jiffy.jit.codegen.impl
 
 import io.github.vbe0201.jiffy.jit.codegen.BytecodeEmitter
 import io.github.vbe0201.jiffy.jit.decoder.Instruction
+import io.github.vbe0201.jiffy.utils.*
 
 /**
  * Generates the Load Unsigned Immediate (LUI) instruction to the
@@ -10,7 +11,7 @@ import io.github.vbe0201.jiffy.jit.decoder.Instruction
 @Suppress("UNUSED_PARAMETER")
 fun lui(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Boolean {
     emitter.setGpr(insn.rt()) {
-        push(insn.imm().toUInt() shl 16)
+        push(insn.imm().zeroExtend32() shl 16)
     }
 
     return true
@@ -23,7 +24,7 @@ fun lui(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Boolean {
 fun ori(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Boolean {
     emitter.setGpr(insn.rt()) {
         getGpr(insn.rs())
-        ior(insn.imm().toUInt())
+        ior(insn.imm().zeroExtend32())
     }
 
     return true
