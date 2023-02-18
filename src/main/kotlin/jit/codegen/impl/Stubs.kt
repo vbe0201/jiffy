@@ -9,7 +9,6 @@ import io.github.vbe0201.jiffy.jit.decoder.Instruction
  *
  * This should only be used during prototyping.
  */
-@Suppress("UNUSED_PARAMETER")
 fun unimplemented(
     pc: UInt,
     insn: Instruction,

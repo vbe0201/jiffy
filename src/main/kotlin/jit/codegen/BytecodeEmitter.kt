@@ -141,6 +141,20 @@ class BytecodeEmitter {
     }
 
     /**
+     * Sets the COP0 status register to a new value.
+     *
+     * The given operation is responsible for placing an integer
+     * value to be written on the stack.
+     */
+    fun setStatus(op: BytecodeEmitter.() -> Unit) {
+        this.visitor.run {
+            visitVarInsn(ALOAD, 1)
+            op()
+            invokevirtual(contextClass, "setCop0Status", "(I)V", false)
+        }
+    }
+
+    /**
      * Writes a 32-bit value to a given address through the CPU bus.
      *
      * The given operation is responsible for placing two integer

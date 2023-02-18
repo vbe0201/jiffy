@@ -51,6 +51,13 @@ class ExecutionContext(
     val lo = 0U
 
     /**
+     * The coprocessor register 12: Status Register.
+     */
+    @get:JvmName("getCop0Status")
+    @set:JvmName("setCop0Status")
+    var status = 0U
+
+    /**
      * Reads a 32-bit value from the given memory address through
      * the CPU bus.
      */
