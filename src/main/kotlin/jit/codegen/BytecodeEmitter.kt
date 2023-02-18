@@ -5,8 +5,14 @@ import io.github.vbe0201.jiffy.jit.translation.Compiled
 import io.github.vbe0201.jiffy.jit.translation.Compiler
 import org.objectweb.asm.commons.InstructionAdapter
 import org.objectweb.asm.ClassWriter
+import org.objectweb.asm.Label
 import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.Type
+
+// The flags to configure the writer with. For the sake of
+// simplicity, we want it to do as much work for us as possible.
+private const val WRITER_FLAGS =
+    ClassWriter.COMPUTE_FRAMES + ClassWriter.COMPUTE_MAXS
 
 // The only officially supported JDK by jiffy is 19.
 // When bumping to a newer version, also change this constant.
@@ -18,7 +24,7 @@ private val compilerClass = Type.getInternalName(Compiler::class.java)
 private val contextClass = Type.getInternalName(ExecutionContext::class.java)
 
 private fun makeWriterWithPrologue(): ClassWriter {
-    val writer = ClassWriter(ClassWriter.COMPUTE_MAXS)
+    val writer = ClassWriter(WRITER_FLAGS)
 
     // Start the new class to generate.
     writer.visit(
@@ -109,6 +115,20 @@ class BytecodeEmitter {
     }
 
     /**
+     * Compares two values on the operand stack and executes the
+     * given operation only when these values are not equal.
+     */
+    fun ifNotEqual(op: BytecodeEmitter.() -> Unit) {
+        this.visitor.run {
+            val label = Label()
+
+            ificmpeq(label)
+            op()
+            visitLabel(label)
+        }
+    }
+
+    /**
      * Reads the value of a general-purpose register from the given
      * index and leaves it on top of the stack.
      */
@@ -177,7 +197,7 @@ class BytecodeEmitter {
      * The given operation is responsible for placing the new program
      * counter value on the operand stack.
      */
-    fun branch(op: BytecodeEmitter.() -> Unit) {
+    fun jump(op: BytecodeEmitter.() -> Unit) {
         this.visitor.run {
             visitVarInsn(ALOAD, 1)
             op()
