@@ -109,26 +109,74 @@ class BytecodeEmitter {
     }
 
     /**
-     * Sets the general-purpose register for the given index to
-     * a new value.
-     *
-     * The caller must ensure the given register index is in a
-     * valid range.
+     * Reads the value of a general-purpose register from the given
+     * index and leaves it on top of the stack.
      */
-    fun setGpr(index: UInt, value: UInt) {
+    fun getGpr(index: UInt) {
         this.visitor.run {
             visitVarInsn(ALOAD, 1)
             invokevirtual(contextClass, "getGprs", "()[I", false)
 
             iconst(index.toInt())
-            iconst(value.toInt())
+            visitInsn(IALOAD)
+        }
+    }
+
+    /*
+       6: aload_1
+       7: invokevirtual #29                 // Method ExecutionContext."getGprs--hP7Qyg":()[I
+      10: bipush        6
+
+      12: aload_1
+      13: invokevirtual #29                 // Method ExecutionContext."getGprs--hP7Qyg":()[I
+      16: iconst_0
+      17: invokestatic  #35                 // Method kotlin/UIntArray."get-pVg5ArA":([II)I
+
+      20: iconst_5
+      21: ior
+
+      22: invokestatic  #41                 // Method kotlin/UInt."constructor-impl":(I)I
+      25: invokestatic  #45                 // Method kotlin/UIntArray."set-VXSXFK8":([III)V
+     */
+
+    /**
+     * Sets the general-purpose register for the given index to
+     * a new value.
+     *
+     * The given operation is responsible for placing an integer
+     * value to be written on the stack.
+     */
+    fun setGpr(index: UInt, op: BytecodeEmitter.() -> Unit) {
+        this.visitor.run {
+            visitVarInsn(ALOAD, 1)
+            invokevirtual(contextClass, "getGprs", "()[I", false)
+
+            iconst(index.toInt())
+            op()
             visitInsn(IASTORE)
         }
     }
 
     /**
-     * Emits a call to [ExecutionContext.unimplemented] into the
-     * implementation of the generated class.
+     * Pushes a given value on the operand stack.
+     */
+    fun push(value: UInt) {
+        this.visitor.iconst(value.toInt())
+    }
+
+    /**
+     * Bitwise ORs a value on the stack with a given value and leaves
+     * the result on the stack.
+     */
+    fun ior(value: UInt) {
+        this.visitor.run {
+            iconst(value.toInt())
+            visitInsn(IOR)
+        }
+    }
+
+    /**
+     * Emits a call to [ExecutionContext.unimplemented].
      */
     fun generateUnimplementedStub() {
         this.visitor.run {

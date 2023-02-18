@@ -9,6 +9,22 @@ import io.github.vbe0201.jiffy.jit.decoder.Instruction
  */
 @Suppress("UNUSED_PARAMETER")
 fun lui(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Boolean {
-    emitter.setGpr(insn.rt(), insn.imm().toUInt() shl 16)
+    emitter.setGpr(insn.rt()) {
+        push(insn.imm().toUInt() shl 16)
+    }
+
+    return true
+}
+
+/**
+ * Generates the OR Immediate (ORI) instruction to the code buffer.
+ */
+@Suppress("UNUSED_PARAMETER")
+fun ori(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Boolean {
+    emitter.setGpr(insn.rt()) {
+        getGpr(insn.rs())
+        ior(insn.imm().toUInt())
+    }
+
     return true
 }
