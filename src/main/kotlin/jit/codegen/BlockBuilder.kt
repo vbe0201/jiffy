@@ -103,7 +103,7 @@ private val handlerTable = arrayOf(
     ::unimplemented,
     ::unimplemented,
 
-    ::unimplemented,
+    ::addi,
     ::addiu,
     ::unimplemented,
     ::unimplemented,
@@ -199,8 +199,8 @@ class BlockBuilder(
      *
      * Returns the translation [Status] of the instruction.
      */
-    private fun addInstruction(context: ExecutionContext): Status {
-        val (addr, insn) = context.fetchNextInstruction()
+    private fun addInstruction(context: ExecutionContext, addr: UInt): Status {
+        val insn = context.bus.readInstruction(addr)
 
         if (shouldEmit(insn)) {
             // TODO: Figure out a nicer way to handle invalid instructions.
@@ -223,13 +223,13 @@ class BlockBuilder(
      *
      * The resulting code will be emitted to the inner [BytecodeEmitter].
      */
-    fun build(context: ExecutionContext): UInt {
+    fun build(context: ExecutionContext, addr: UInt): UInt {
         var processed = 0U
 
         // Emit more instructions until the block is complete.
         var status = Status.CONTINUE_BLOCK
         while (status == Status.CONTINUE_BLOCK) {
-            status = addInstruction(context)
+            status = addInstruction(context, addr + processed)
             processed += INSTRUCTION_SIZE
         }
 
@@ -239,7 +239,7 @@ class BlockBuilder(
         // NOTE: Multiple consecutive branches are forbidden
         // by the MIPS manual, so we don't need to handle this.
         if (status == Status.FILL_DELAY_SLOT) {
-            addInstruction(context)
+            addInstruction(context, addr + processed)
             processed += INSTRUCTION_SIZE
         }
 

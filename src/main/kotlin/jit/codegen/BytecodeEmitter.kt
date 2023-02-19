@@ -93,6 +93,8 @@ class BytecodeEmitter {
         )
     )
 
+    private var localSlot = 1
+
     /**
      * Completes the generation of a class and returns the generated code.
      *
@@ -115,6 +117,25 @@ class BytecodeEmitter {
     }
 
     /**
+     * Stores the value on top of the operand stack as a local variable.
+     *
+     * Returns the slot index to load the value at a later time.
+     */
+    fun storeLocal(): Int {
+        ++this.localSlot
+        this.visitor.visitVarInsn(ISTORE, this.localSlot)
+        return this.localSlot
+    }
+
+    /**
+     * Loads a local variable at a given slot to the top of the
+     * operand stack.
+     */
+    fun loadLocal(slot: Int) {
+        this.visitor.visitVarInsn(ILOAD, slot)
+    }
+
+    /**
      * Compares two values on the operand stack and executes the
      * given operation only when these values are not equal.
      */
@@ -123,6 +144,20 @@ class BytecodeEmitter {
             val label = Label()
 
             ificmpeq(label)
+            op()
+            visitLabel(label)
+        }
+    }
+
+    /**
+     * Executes an operation only when a value on the operand stack
+     * is smaller than zero.
+     */
+    fun ifSmallerThanZero(op: BytecodeEmitter.() -> Unit) {
+        this.visitor.run {
+            val label = Label()
+
+            ifge(label)
             op()
             visitLabel(label)
         }
@@ -257,6 +292,22 @@ class BytecodeEmitter {
                 iconst(value.toInt())
             }
             visitInsn(IOR)
+        }
+    }
+
+    /**
+     * Bitwise XORs two values on the operand stack and leaves the
+     * result on top of the stack.
+     *
+     * An optional immediate value may be pushed to the stack
+     * before the operation, when supplied.
+     */
+    fun ixor(value: UInt?) {
+        this.visitor.run {
+            if (value != null) {
+                iconst(value.toInt())
+            }
+            visitInsn(IXOR)
         }
     }
 

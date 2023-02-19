@@ -77,16 +77,6 @@ class ExecutionContext(
     }
 
     /**
-     * Fetches the next instruction from the current program counter and
-     * returns it as a [Pair] of address and [Instruction].
-     */
-    fun fetchNextInstruction(): Pair<UInt, Instruction> {
-        val current = this.pc to this.bus.readInstruction(this.pc)
-        this.pc += INSTRUCTION_SIZE
-        return current
-    }
-
-    /**
      * Throws a [NotImplementedError] when called.
      *
      * The main purpose of this stub is prototyping; it is expected to be

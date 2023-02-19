@@ -2,6 +2,7 @@ package io.github.vbe0201.jiffy.jit.codegen.impl
 
 import io.github.vbe0201.jiffy.jit.codegen.BytecodeEmitter
 import io.github.vbe0201.jiffy.jit.codegen.Status
+import io.github.vbe0201.jiffy.jit.decoder.INSTRUCTION_SIZE
 import io.github.vbe0201.jiffy.jit.decoder.Instruction
 import io.github.vbe0201.jiffy.utils.signExtend32
 
@@ -31,9 +32,16 @@ fun j(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
  */
 fun bne(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
     emitter.run {
+        // Adjust the program counter past the branch and its delay slot.
+        // This is so we don't get stuck on a block when branch is not taken.
+        jump {
+            push(pc + (INSTRUCTION_SIZE * 2U))
+        }
+
         getGpr(insn.rs())
         getGpr(insn.rt())
 
+        // When the registers are not equal, branch to the target.
         ifNotEqual {
             jump {
                 push(computeBranchTarget(pc, insn.imm()))

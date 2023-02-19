@@ -23,5 +23,5 @@ enum class Status {
     /**
      * Terminates a block without any additional side effects.
      */
-    TERMINATE_BLOCK,
+    TERMINATE_BLOCK
 }
