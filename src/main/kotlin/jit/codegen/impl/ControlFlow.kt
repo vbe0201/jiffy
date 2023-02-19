@@ -17,12 +17,8 @@ private fun computeBranchTarget(pc: UInt, target: UShort): UInt {
  */
 fun j(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
     emitter.jump {
-        // Mask the current program counter value.
-        push(pc)
-        iand(0xF000_0000U)
-
-        // Compute the destination for the branch.
-        ior(insn.target() shl 2)
+        val offset = insn.target() shl 2
+        push((pc and 0xF000_0000U) or offset)
     }
 
     return Status.FILL_BRANCH_DELAY_SLOT
