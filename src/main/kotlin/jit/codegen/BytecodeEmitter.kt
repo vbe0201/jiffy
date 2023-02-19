@@ -136,30 +136,38 @@ class BytecodeEmitter {
     }
 
     /**
-     * Compares two values on the operand stack and executes the
-     * given operation only when these values are not equal.
+     * Builds conditional if/else constructs based on a [Condition].
+     *
+     * The [Conditional.orElse] logic is optional.
      */
-    fun ifNotEqual(op: BytecodeEmitter.() -> Unit) {
+    fun conditional(cond: Condition, action: Conditional.() -> Unit) {
+        val conditional = Conditional(cond).apply(action)
         this.visitor.run {
-            val label = Label()
+            val elseLabel = Label()
+            val endLabel = Label()
 
-            ificmpeq(label)
-            op()
-            visitLabel(label)
-        }
-    }
+            // First, emit the condition to check for.
+            when (conditional.cond) {
+                Condition.INTS_NOT_EQUAL -> ificmpeq(elseLabel)
+                Condition.SMALLER_THAN_ZERO -> ifge(elseLabel)
+            }
 
-    /**
-     * Executes an operation only when a value on the operand stack
-     * is smaller than zero.
-     */
-    fun ifSmallerThanZero(op: BytecodeEmitter.() -> Unit) {
-        this.visitor.run {
-            val label = Label()
+            val orElse = conditional.orElse
 
-            ifge(label)
-            op()
-            visitLabel(label)
+            // When the condition is fulfilled, the `then` code will run.
+            // If else is given, we need to skip it after this.
+            (conditional.then!!)()
+            if (orElse != null) {
+                goTo(endLabel)
+            }
+
+            // Bind the label for skipping the `then` block and place the
+            // `orElse` logic behind it.
+            visitLabel(elseLabel)
+            if (orElse != null) {
+                orElse()
+                visitLabel(endLabel)
+            }
         }
     }
 

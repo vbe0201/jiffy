@@ -1,6 +1,7 @@
 package io.github.vbe0201.jiffy.jit.codegen.impl
 
 import io.github.vbe0201.jiffy.jit.codegen.BytecodeEmitter
+import io.github.vbe0201.jiffy.jit.codegen.Condition
 import io.github.vbe0201.jiffy.jit.codegen.Status
 import io.github.vbe0201.jiffy.jit.decoder.Instruction
 import io.github.vbe0201.jiffy.utils.*
@@ -46,15 +47,19 @@ fun addi(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
         ixor(imm)
 
         iand(null)
-        ifSmallerThanZero {
-            // TODO: Raise an exception for the overflow.
-            generateUnimplementedStub()
-        }
-    }
+        conditional(Condition.SMALLER_THAN_ZERO) {
+            then = {
+                // TODO: Raise an exception for the overflow.
+                generateUnimplementedStub()
+            }
 
-    // When we were successful, write the sum to the target register.
-    emitter.setGpr(insn.rt()) {
-        loadLocal(sumSlot)
+            orElse = {
+                // When we were successful, write the sum to the register.
+                setGpr(insn.rt()) {
+                    loadLocal(sumSlot)
+                }
+            }
+        }
     }
 
     return Status.CONTINUE_BLOCK
