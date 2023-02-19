@@ -20,5 +20,5 @@ enum class State {
      * The program has finished or translation has decided to
      * stop the program.
      */
-    CLOSED,
+    CLOSED
 }

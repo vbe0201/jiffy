@@ -5,7 +5,11 @@ import io.github.vbe0201.jiffy.jit.codegen.Status
 import io.github.vbe0201.jiffy.jit.decoder.Instruction
 import kotlin.system.exitProcess
 
-fun cop0(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+internal fun cop0(
+    pc: UInt,
+    insn: Instruction,
+    emitter: BytecodeEmitter
+): Status {
     return when (insn.copOpcode()) {
         0b0100U -> mtc0(pc, insn, emitter)
 
@@ -14,6 +18,10 @@ fun cop0(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
     }
 }
 
+/**
+ * Generates the Move To Coprocessor 0 (MTC0) instruction to the
+ * code buffer.
+ */
 @Suppress("UNUSED_PARAMETER")
 fun mtc0(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
     assert(insn.rd() == 12U) { "Other COP0 registers not yet implemented" }

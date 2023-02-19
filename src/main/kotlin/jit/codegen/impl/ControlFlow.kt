@@ -12,7 +12,7 @@ private fun computeBranchTarget(pc: UInt, target: UShort): UInt {
 }
 
 /**
- * Emits a Jump (J) instruction to the code buffer.
+ * Generates the Jump (J) instruction to the code buffer.
  */
 fun j(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
     emitter.jump {
@@ -28,7 +28,7 @@ fun j(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
 }
 
 /**
- * Emits a Branch Not Equal (BNE) instruction to the code buffer.
+ * Generates the Branch Not Equal (BNE) instruction to the code buffer.
  */
 fun bne(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
     emitter.run {

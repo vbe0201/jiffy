@@ -21,6 +21,9 @@ fun addiu(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
     return Status.CONTINUE_BLOCK
 }
 
+/**
+ * Generates the Add Immediate (ADDI) instruction to the code buffer.
+ */
 @Suppress("UNUSED_PARAMETER")
 fun addi(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
     val imm = insn.imm().signExtend32()
