@@ -25,7 +25,7 @@ fun j(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
         ior(insn.target() shl 2)
     }
 
-    return Status.FILL_DELAY_SLOT
+    return Status.FILL_BRANCH_DELAY_SLOT
 }
 
 /**
@@ -54,5 +54,5 @@ fun bne(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
         }
     }
 
-    return Status.FILL_DELAY_SLOT
+    return Status.FILL_BRANCH_DELAY_SLOT
 }

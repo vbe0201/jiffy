@@ -43,5 +43,5 @@ enum class InstructionKind(val opcode: UByte) {
     SWC0(0x38U),
     SWC1(0x39U),
     SWC2(0x3AU),
-    SWC3(0x3BU)
+    SWC3(0x3BU),
 }

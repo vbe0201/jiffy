@@ -31,5 +31,5 @@ enum class FunctionKind(val opcode: UByte) {
     XOR(0x26U),
     NOR(0x27U),
     SLT(0x2AU),
-    SLTU(0x2BU)
+    SLTU(0x2BU),
 }

@@ -59,7 +59,7 @@ private val handlerTable = arrayOf(
     ::unimplemented,
     ::unimplemented,
     ::unimplemented,
-    ::unimplemented,
+    ::lw,
     ::unimplemented,
     ::unimplemented,
     ::unimplemented,
@@ -228,8 +228,21 @@ class BlockBuilder(
 
         // Emit more instructions until the block is complete.
         var status = Status.CONTINUE_BLOCK
-        while (status == Status.CONTINUE_BLOCK) {
-            status = addInstruction(context, addr + processed)
+        while (status.blockOpen()) {
+            val nextStatus = addInstruction(context, addr + processed)
+
+            // When we have a branch delay slot to handle from the
+            // previous instruction, we need to finish it after the
+            // next instruction has executed.
+            //
+            // Note that branch delay slots are additionally taken
+            // care of when registers are written to by instructions.
+            // But that screws us when an instruction doesn't write back.
+            if (status == Status.FILL_LOAD_DELAY_SLOT) {
+                this.emitter.finishDelayedLoad()
+            }
+
+            status = nextStatus
             processed += INSTRUCTION_SIZE
         }
 
@@ -238,7 +251,7 @@ class BlockBuilder(
         //
         // NOTE: Multiple consecutive branches are forbidden
         // by the MIPS manual, so we don't need to handle this.
-        if (status == Status.FILL_DELAY_SLOT) {
+        if (status == Status.FILL_BRANCH_DELAY_SLOT) {
             addInstruction(context, addr + processed)
             processed += INSTRUCTION_SIZE
         }

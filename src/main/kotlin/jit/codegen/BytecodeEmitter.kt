@@ -23,6 +23,9 @@ private val compiledInterface = Type.getInternalName(Compiled::class.java)
 private val compilerClass = Type.getInternalName(Compiler::class.java)
 private val contextClass = Type.getInternalName(ExecutionContext::class.java)
 
+// The local variable slot for a value from a delayed memory load.
+private const val DELAYED_LOAD_SLOT = 2
+
 private fun makeWriterWithPrologue(): ClassWriter {
     val writer = ClassWriter(WRITER_FLAGS)
 
@@ -93,7 +96,14 @@ class BytecodeEmitter {
         )
     )
 
-    private var localSlot = 1
+    // Local variable slots which may be used during codegen to preserve
+    // values and load them back onto the operand stack at a later time.
+    // Slot 2 is reserved for the value of a delayed load.
+    private var localSlot = 2
+
+    // The target register of a pending memory load. By default, this is
+    // set to zero since loads to `$zero` would be ignored anyway.
+    private var pendingLoad = 0U
 
     /**
      * Completes the generation of a class and returns the generated code.
@@ -122,8 +132,7 @@ class BytecodeEmitter {
      * Returns the slot index to load the value at a later time.
      */
     fun storeLocal(): Int {
-        ++this.localSlot
-        this.visitor.visitVarInsn(ISTORE, this.localSlot)
+        this.visitor.visitVarInsn(ISTORE, ++this.localSlot)
         return this.localSlot
     }
 
@@ -193,6 +202,8 @@ class BytecodeEmitter {
      * value to be written on the stack.
      */
     fun setGpr(index: UInt, op: BytecodeEmitter.() -> Unit) {
+        finishDelayedLoad()
+
         this.visitor.run {
             visitVarInsn(ALOAD, 1)
             invokevirtual(contextClass, "getGprs", "()[I", false)
@@ -215,6 +226,40 @@ class BytecodeEmitter {
             op()
             invokevirtual(contextClass, "setCop0Status", "(I)V", false)
         }
+    }
+
+    /**
+     * Completes a pending delayed load, if any.
+     *
+     * This will set the destination register to the loaded value.
+     */
+    fun finishDelayedLoad() {
+        val loadReg = this.pendingLoad
+        if (loadReg != 0U) {
+            this.pendingLoad = 0U
+            setGpr(loadReg) {
+                loadLocal(DELAYED_LOAD_SLOT)
+            }
+        }
+    }
+
+    /**
+     * Loads a 32-bit value from a given address through the CPU bus.
+     *
+     * This takes the destination register of the load and stores the
+     * value of the load without applying it to the register yet.
+     *
+     * Since this handles the delay slot, the result will not be
+     * visible before the next instruction has finished executing.
+     */
+    fun loadBusDelayed32(reg: UInt, op: BytecodeEmitter.() -> Unit) {
+        this.visitor.run {
+            visitVarInsn(ALOAD, 1)
+            op()
+            invokevirtual(contextClass, "read32", "(I)I", false)
+            visitVarInsn(ISTORE, DELAYED_LOAD_SLOT)
+        }
+        this.pendingLoad = reg
     }
 
     /**

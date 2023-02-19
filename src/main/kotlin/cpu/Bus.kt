@@ -45,7 +45,10 @@ class Bus(private val bios: ByteBuffer) {
         return when (addr) {
             in BIOS_START..BIOS_END -> readBios(addr)
 
-            else -> TODO("[$addr] Memory read not yet implemented")
+            else -> {
+                println("read32(0x${addr.toString(16)})")
+                0U
+            }
         }
     }
 
