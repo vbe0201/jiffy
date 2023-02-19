@@ -24,7 +24,7 @@ internal fun cop0(
  */
 @Suppress("UNUSED_PARAMETER")
 fun mtc0(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
-    assert(insn.rd() == 12U) { "Other COP0 registers not yet implemented" }
+    check(insn.rd() == 12U) { "Other COP0 registers not yet implemented" }
     emitter.setStatus {
         getGpr(insn.rt())
     }

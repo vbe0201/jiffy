@@ -22,7 +22,7 @@ class Bus(private val bios: ByteBuffer) {
     // and make sure that we get an image of the expected size.
     init {
         bios.order(ByteOrder.LITTLE_ENDIAN)
-        assert(bios.remaining() == BIOS_SIZE) { "Invalid BIOS image supplied!" }
+        require(bios.remaining() == BIOS_SIZE) { "Invalid BIOS image supplied!" }
     }
 
     private fun readBios(addr: UInt): UInt {
