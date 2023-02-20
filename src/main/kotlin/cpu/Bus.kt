@@ -53,6 +53,15 @@ class Bus(private val bios: ByteBuffer) {
     }
 
     /**
+     * Writes a 16-bit value to a given memory address in little-endian
+     * byte ordering.
+     */
+    fun write16(addr: UInt, value: UShort) {
+        // TODO
+        println("write16(0x${addr.toString(16)}, 0x${value.toString(16)})")
+    }
+
+    /**
      * Writes a 32-bit value to a given memory address in little-endian
      * byte ordering.
      */

@@ -72,7 +72,17 @@ class ExecutionContext(
     }
 
     /**
-     * Writes a 32-bit value to a given memory address thorugh the
+     * Writes a 16-bit value to a given memory address through the
+     * CPU bus.
+     */
+    @JvmName("write16")
+    fun write16(addr: UInt, value: UShort) {
+        // TODO: Alignment check.
+        this.bus.write16(addr, value)
+    }
+
+    /**
+     * Writes a 32-bit value to a given memory address through the
      * CPU bus.
      */
     @JvmName("write32")

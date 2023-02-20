@@ -35,3 +35,20 @@ fun sw(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
 
     return Status.CONTINUE_BLOCK
 }
+
+/**
+ * Generates the Store Halfword (SH) instruction to the code buffer.
+ */
+@Suppress("UNUSED_PARAMETER")
+fun sh(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+    emitter.writeBus16 {
+        // Compute the memory address to write to.
+        getGpr(insn.rs())
+        iadd(insn.imm().signExtend32())
+
+        // Prepare the value to write.
+        getGpr(insn.rt())
+    }
+
+    return Status.CONTINUE_BLOCK
+}

@@ -279,6 +279,24 @@ class BytecodeEmitter {
     }
 
     /**
+     * Writes a 16-bit value to a given address through the CPU bus.
+     *
+     * The given operation is responsible for placing two integer
+     * values addr, value on the stack in this order.
+     *
+     * The conversion of value to [UShort] along with a call to
+     * [ExecutionContext.write32] will then be emitted.
+     */
+    fun writeBus16(op: BytecodeEmitter.() -> Unit) {
+        this.visitor.run {
+            visitVarInsn(ALOAD, 1)
+            op()
+            visitInsn(I2S)
+            invokevirtual(contextClass, "write16", "(IS)V", false)
+        }
+    }
+
+    /**
      * Writes a 32-bit value to a given address through the CPU bus.
      *
      * The given operation is responsible for placing two integer
