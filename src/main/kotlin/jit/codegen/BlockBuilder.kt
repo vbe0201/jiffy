@@ -23,7 +23,7 @@ private val handlerTable = arrayOf(
     ::function,
     ::unimplemented,
     ::j,
-    ::unimplemented,
+    ::jal,
     ::unimplemented,
     ::bne,
     ::unimplemented,

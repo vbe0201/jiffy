@@ -25,6 +25,19 @@ fun j(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
 }
 
 /**
+ * Generates the Jump And Link (JAL) instruction to the code buffer.
+ */
+fun jal(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+    // Store the return address in the `$ra` register.
+    emitter.setGpr(31U) {
+        push(pc + INSTRUCTION_SIZE)
+    }
+
+    // Perform a regular jump to the destination.
+    return j(pc, insn, emitter)
+}
+
+/**
  * Generates the Branch Not Equal (BNE) instruction to the code buffer.
  */
 fun bne(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
