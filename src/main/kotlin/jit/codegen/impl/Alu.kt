@@ -66,6 +66,20 @@ fun addi(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
 }
 
 /**
+ * Generates the Add Unsigned (ADDU) instruction to the code buffer.
+ */
+@Suppress("UNUSED_PARAMETER")
+fun addu(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+    emitter.setGpr(insn.rd()) {
+        getGpr(insn.rs())
+        getGpr(insn.rt())
+        iadd(null)
+    }
+
+    return Status.CONTINUE_BLOCK
+}
+
+/**
  * Generates the Load Unsigned Immediate (LUI) instruction to the
  * code buffer.
  */
