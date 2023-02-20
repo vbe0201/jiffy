@@ -2,8 +2,7 @@ package io.github.vbe0201.jiffy.jit.state
 
 import io.github.vbe0201.jiffy.cpu.BIOS_START
 import io.github.vbe0201.jiffy.cpu.Bus
-import io.github.vbe0201.jiffy.jit.decoder.INSTRUCTION_SIZE
-import io.github.vbe0201.jiffy.jit.decoder.Instruction
+import io.github.vbe0201.jiffy.cpu.Cop0
 
 /**
  * The execution context of the JIT.
@@ -15,7 +14,11 @@ class ExecutionContext(
     /**
      * The [Bus] interface to use during program execution.
      */
-    val bus: Bus
+    val bus: Bus,
+    /**
+     * The [Cop0] unit used by the MIPS processor.
+     */
+    val cop0: Cop0
 ) {
     /**
      * The execution [State] of this context.
@@ -51,11 +54,12 @@ class ExecutionContext(
     val lo = 0U
 
     /**
-     * The coprocessor register 12: Status Register.
+     * Sets a [Cop0] register to a given value.
      */
-    @get:JvmName("getCop0Status")
-    @set:JvmName("setCop0Status")
-    var status = 0U
+    @JvmName("setCop0Register")
+    fun setCop0Register(index: UInt, value: UInt) {
+        this.cop0.setRegister(index, value)
+    }
 
     /**
      * Reads a 32-bit value from the given memory address through

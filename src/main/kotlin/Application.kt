@@ -1,6 +1,7 @@
 package io.github.vbe0201.jiffy
 
 import io.github.vbe0201.jiffy.cpu.Bus
+import io.github.vbe0201.jiffy.cpu.Cop0
 import io.github.vbe0201.jiffy.jit.state.ExecutionContext
 import io.github.vbe0201.jiffy.jit.translation.Translator
 import java.io.File
@@ -12,7 +13,7 @@ fun main(args: Array<String>) {
     val bus = Bus(bios)
 
     // Construct the JIT state.
-    val context = ExecutionContext(bus)
+    val context = ExecutionContext(bus, Cop0())
     val translator = Translator()
 
     // Run the JIT until the program is done.

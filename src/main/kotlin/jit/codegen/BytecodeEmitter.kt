@@ -220,11 +220,11 @@ class BytecodeEmitter {
      * The given operation is responsible for placing an integer
      * value to be written on the stack.
      */
-    fun setStatus(op: BytecodeEmitter.() -> Unit) {
+    fun setCop0Register(op: BytecodeEmitter.() -> Unit) {
         this.visitor.run {
             visitVarInsn(ALOAD, 1)
             op()
-            invokevirtual(contextClass, "setCop0Status", "(I)V", false)
+            invokevirtual(contextClass, "setCop0Register", "(II)V", false)
         }
     }
 
