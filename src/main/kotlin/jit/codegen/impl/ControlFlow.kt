@@ -9,7 +9,7 @@ import io.github.vbe0201.jiffy.utils.signExtend32
 
 private fun computeBranchTarget(pc: UInt, target: UShort): UInt {
     val offset = target.signExtend32() shl 2
-    return pc + offset
+    return (pc + INSTRUCTION_SIZE) + offset
 }
 
 /**

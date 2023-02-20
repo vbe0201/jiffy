@@ -11,6 +11,18 @@ enum class Condition {
     INTS_NOT_EQUAL,
 
     /**
+     * Compares two integers on the stack and runs the block
+     * only when the first one is smaller than the second.
+     */
+    INT_SMALLER_THAN,
+
+    /**
+     * Compares two unsigned integers on the stack and runs the
+     * block only when the first one is smaller than the second.
+     */
+    UNSIGNED_INT_SMALLER_THAN,
+
+    /**
      * Checks an operand on the stack for smaller than zero and
      * runs the block only when that is the case.
      */

@@ -104,3 +104,22 @@ fun or(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
 
     return Status.CONTINUE_BLOCK
 }
+
+/**
+ * Generates the Set on Less Than Unsigned (SLTU) instruction to
+ * the code buffer.
+ */
+@Suppress("UNUSED_PARAMETER")
+fun sltu(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+    emitter.setGpr(insn.rd()) {
+        getGpr(insn.rs())
+        getGpr(insn.rt())
+
+        conditional(Condition.UNSIGNED_INT_SMALLER_THAN) {
+            then = { push(1U) }
+            orElse = { push(0U) }
+        }
+    }
+
+    return Status.CONTINUE_BLOCK
+}

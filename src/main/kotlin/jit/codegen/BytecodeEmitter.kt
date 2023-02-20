@@ -158,6 +158,17 @@ class BytecodeEmitter {
             // First, emit the condition to check for.
             when (conditional.cond) {
                 Condition.INTS_NOT_EQUAL -> ificmpeq(elseLabel)
+                Condition.INT_SMALLER_THAN -> ificmpge(elseLabel)
+                Condition.UNSIGNED_INT_SMALLER_THAN -> {
+                    invokestatic(
+                        "java/lang/Integer",
+                        "compareUnsigned",
+                        "(II)I",
+                        false
+                    )
+                    ifge(elseLabel)
+                }
+
                 Condition.SMALLER_THAN_ZERO -> ifge(elseLabel)
             }
 

@@ -142,7 +142,7 @@ private val functionTable = arrayOf(
     ::unimplemented,
     ::unimplemented,
     ::unimplemented,
-    ::unimplemented,
+    ::sltu,
     ::unimplemented,
     ::unimplemented,
     ::unimplemented,
