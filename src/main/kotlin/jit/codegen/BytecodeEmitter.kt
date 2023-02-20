@@ -257,6 +257,11 @@ class BytecodeEmitter {
             visitVarInsn(ALOAD, 1)
             op()
             invokevirtual(contextClass, "read32", "(I)I", false)
+
+            // Finish pending memory loads to prevent the last cached value
+            // from being overwritten in consecutive load sequences.
+            finishDelayedLoad()
+
             visitVarInsn(ISTORE, DELAYED_LOAD_SLOT)
         }
         this.pendingLoad = reg

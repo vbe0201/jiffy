@@ -236,8 +236,8 @@ class BlockBuilder(
             // next instruction has executed.
             //
             // Note that branch delay slots are additionally taken
-            // care of when registers are written to by instructions.
-            // But that screws us when an instruction doesn't write back.
+            // care of at register writes and additional memory loads.
+            // This handles the case where none of these things happen.
             if (status == Status.FILL_LOAD_DELAY_SLOT) {
                 this.emitter.finishDelayedLoad()
             }

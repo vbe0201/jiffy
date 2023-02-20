@@ -61,6 +61,7 @@ class ExecutionContext(
      * Reads a 32-bit value from the given memory address through
      * the CPU bus.
      */
+    @JvmName("read32")
     fun read32(addr: UInt): UInt {
         // TODO: Alignment check.
         return this.bus.read32(addr)
