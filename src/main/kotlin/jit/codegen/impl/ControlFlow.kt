@@ -30,7 +30,7 @@ fun j(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
 fun jal(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
     // Store the return address in the `$ra` register.
     emitter.setGpr(31U) {
-        push(pc + INSTRUCTION_SIZE)
+        push(pc + INSTRUCTION_SIZE * 2U)
     }
 
     // Perform a regular jump to the destination.
@@ -57,7 +57,7 @@ fun bne(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
             // Otherwise, adjust the PC past the branch and its delay slot.
             orElse = {
                 jump {
-                    push(pc + (INSTRUCTION_SIZE * 2U))
+                    push(pc + INSTRUCTION_SIZE * 2U)
                 }
             }
         }
