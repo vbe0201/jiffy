@@ -93,6 +93,19 @@ fun lui(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
 }
 
 /**
+ * Generates the AND Immediate (ANDI) instruction to the code buffer.
+ */
+@Suppress("UNUSED_PARAMETER")
+fun andi(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+    emitter.setGpr(insn.rt()) {
+        getGpr(insn.rs())
+        iand(insn.imm().zeroExtend32())
+    }
+
+    return Status.CONTINUE_BLOCK
+}
+
+/**
  * Generates the OR Immediate (ORI) instruction to the code buffer.
  */
 @Suppress("UNUSED_PARAMETER")
