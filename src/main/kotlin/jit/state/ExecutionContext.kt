@@ -72,6 +72,15 @@ class ExecutionContext(
     }
 
     /**
+     * Writes an 8-bit value to a given memory address through the
+     * CPU bus.
+     */
+    @JvmName("write8")
+    fun write8(addr: UInt, value: UByte) {
+        this.bus.write8(addr, value)
+    }
+
+    /**
      * Writes a 16-bit value to a given memory address through the
      * CPU bus.
      */

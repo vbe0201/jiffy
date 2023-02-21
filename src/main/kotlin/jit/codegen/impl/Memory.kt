@@ -20,11 +20,11 @@ fun lw(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
 }
 
 /**
- * Generates the Store Word (SW) instruction to the code buffer.
+ * Generates the Store Byte (SB) instruction to the code buffer.
  */
 @Suppress("UNUSED_PARAMETER")
-fun sw(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
-    emitter.writeBus32 {
+fun sb(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+    emitter.writeBus8 {
         // Compute the memory address to write to.
         getGpr(insn.rs())
         iadd(insn.imm().signExtend32())
@@ -42,6 +42,23 @@ fun sw(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
 @Suppress("UNUSED_PARAMETER")
 fun sh(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
     emitter.writeBus16 {
+        // Compute the memory address to write to.
+        getGpr(insn.rs())
+        iadd(insn.imm().signExtend32())
+
+        // Prepare the value to write.
+        getGpr(insn.rt())
+    }
+
+    return Status.CONTINUE_BLOCK
+}
+
+/**
+ * Generates the Store Word (SW) instruction to the code buffer.
+ */
+@Suppress("UNUSED_PARAMETER")
+fun sw(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+    emitter.writeBus32 {
         // Compute the memory address to write to.
         getGpr(insn.rs())
         iadd(insn.imm().signExtend32())
