@@ -30,11 +30,6 @@ fun j(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
 fun jal(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
     // Store the return address in the `$ra` register.
     emitter.setGpr(31U) {
-        //push(0x1fc0680cU)
-        //push(pc)
-        //conditional(Condition.INTS_EQUAL) {
-        //    then = { generateUnimplementedStub()}
-        //}
         push(pc + INSTRUCTION_SIZE * 2U)
     }
 

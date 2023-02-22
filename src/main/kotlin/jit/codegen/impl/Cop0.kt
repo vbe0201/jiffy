@@ -17,7 +17,7 @@ internal fun cop0(
         // TODO: Figure out a better way to handle invalid instructions.
         else -> {
             println("Unimplemented coprocessor instruction: $op")
-            exitProcess(1)
+            return unimplemented(pc, insn, emitter)
         }
     }
 }
