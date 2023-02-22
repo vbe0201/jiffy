@@ -6,6 +6,20 @@ import io.github.vbe0201.jiffy.jit.decoder.Instruction
 import io.github.vbe0201.jiffy.utils.signExtend32
 
 /**
+ * Generates the Load Byte (LB) instruction to the code buffer.
+ */
+@Suppress("UNUSED_PARAMETER")
+fun lb(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+    emitter.loadBusDelayed8(insn.rt()) {
+        // Compute the memory address to read from.
+        getGpr(insn.rs())
+        iadd(insn.imm().signExtend32())
+    }
+
+    return Status.FILL_LOAD_DELAY_SLOT
+}
+
+/**
  * Generates the Load Word (LW) instruction to the code buffer.
  */
 @Suppress("UNUSED_PARAMETER")

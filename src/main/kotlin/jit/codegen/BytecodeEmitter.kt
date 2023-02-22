@@ -255,6 +255,54 @@ class BytecodeEmitter {
     }
 
     /**
+     * Loads an 8-bit value from a given address through the CPU bus.
+     *
+     * This takes the destination register of the load and stores the
+     * value of the load without applying it to the register yet.
+     *
+     * Since this handles the delay slot, the result will not be
+     * visible before the next instruction has finished executing.
+     */
+    fun loadBusDelayed8(reg: UInt, op: BytecodeEmitter.() -> Unit) {
+        this.visitor.run {
+            visitVarInsn(ALOAD, 1)
+            op()
+            invokevirtual(contextClass, "read8", "(I)B", false)
+
+            // Finish pending memory loads to prevent the last cached value
+            // from being overwritten in consecutive load sequences.
+            finishDelayedLoad()
+
+            visitVarInsn(ISTORE, DELAYED_LOAD_SLOT)
+        }
+        this.pendingLoad = reg
+    }
+
+    /**
+     * Loads an 16-bit value from a given address through the CPU bus.
+     *
+     * This takes the destination register of the load and stores the
+     * value of the load without applying it to the register yet.
+     *
+     * Since this handles the delay slot, the result will not be
+     * visible before the next instruction has finished executing.
+     */
+    fun loadBusDelayed16(reg: UInt, op: BytecodeEmitter.() -> Unit) {
+        this.visitor.run {
+            visitVarInsn(ALOAD, 1)
+            op()
+            invokevirtual(contextClass, "read16", "(I)S", false)
+
+            // Finish pending memory loads to prevent the last cached value
+            // from being overwritten in consecutive load sequences.
+            finishDelayedLoad()
+
+            visitVarInsn(ISTORE, DELAYED_LOAD_SLOT)
+        }
+        this.pendingLoad = reg
+    }
+
+    /**
      * Loads a 32-bit value from a given address through the CPU bus.
      *
      * This takes the destination register of the load and stores the

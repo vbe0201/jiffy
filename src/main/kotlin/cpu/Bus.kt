@@ -7,7 +7,11 @@ import java.nio.ByteOrder
 
 private const val KIB = 1 shl 10
 
+private const val RAM_SIZE = 2048 * KIB
 private const val BIOS_SIZE = 512 * KIB
+
+const val RAM_START = 0x0000_0000U
+const val RAM_END = 0x0020_0000U
 
 const val BIOS_START = 0x1FC0_0000U
 const val BIOS_END = 0x1FC8_0000U
@@ -19,16 +23,60 @@ const val BIOS_END = 0x1FC8_0000U
  * to memory or I/O devices.
  */
 class Bus(private val bios: ByteBuffer) {
-    // Configure BIOS accesses to be in little-endian byte ordering
-    // and make sure that we get an image of the expected size.
+    private val ram = ByteBuffer.wrap(ByteArray(RAM_SIZE) { 0xCA.toByte() })
+
+    // Configure memory accesses to be in little-endian byte ordering
+    // and make sure that we get a BIOS image of the expected size.
     init {
         bios.order(ByteOrder.LITTLE_ENDIAN)
         require(bios.remaining() == BIOS_SIZE) { "Invalid BIOS image supplied!" }
+
+        ram.order(ByteOrder.LITTLE_ENDIAN)
     }
 
-    private fun readBios(addr: UInt): UInt {
-        val offset = (addr - BIOS_START).toInt()
-        return this.bios.getInt(offset).toUInt()
+    private fun readBuf8(buf: ByteBuffer, addr: UInt, base: UInt): UByte {
+        val offset = (addr - base).toInt()
+        return buf.get(offset).toUByte()
+    }
+
+    private fun readBuf16(buf: ByteBuffer, addr: UInt, base: UInt): UShort {
+        val offset = (addr - base).toInt()
+        return buf.getShort(offset).toUShort()
+    }
+
+    private fun readBuf32(buf: ByteBuffer, addr: UInt, base: UInt): UInt {
+        val offset = (addr - base).toInt()
+        return buf.getInt(offset).toUInt()
+    }
+
+    private fun writeBuf8(
+        buf: ByteBuffer,
+        addr: UInt,
+        base: UInt,
+        value: UByte
+    ) {
+        val offset = (addr - base).toInt()
+        buf.put(offset, value.toByte())
+    }
+
+    private fun writeBuf16(
+        buf: ByteBuffer,
+        addr: UInt,
+        base: UInt,
+        value: UShort
+    ) {
+        val offset = (addr - base).toInt()
+        buf.putShort(offset, value.toShort())
+    }
+
+    private fun writeBuf32(
+        buf: ByteBuffer,
+        addr: UInt,
+        base: UInt,
+        value: UInt
+    ) {
+        val offset = (addr - base).toInt()
+        buf.putInt(offset, value.toInt())
     }
 
     /**
@@ -39,16 +87,48 @@ class Bus(private val bios: ByteBuffer) {
     }
 
     /**
+     * Reads an 8-bit value from the given memory address.
+     */
+    fun read8(addr: UInt): UByte {
+        return when (val masked = maskSegment(addr)) {
+            in RAM_START..RAM_END -> readBuf8(this.ram, masked, RAM_START)
+            in BIOS_START..BIOS_END -> readBuf8(this.bios, masked, BIOS_START)
+
+            else -> {
+                println("read8(0x${masked.toString(16)})")
+                0U
+            }
+        }
+    }
+
+    /**
+     * Reads a 32-bit value from the given memory address in little-endian
+     * byte ordering.
+     */
+    fun read16(addr: UInt): UShort {
+        return when (val masked = maskSegment(addr)) {
+            in RAM_START..RAM_END -> readBuf16(this.ram, masked, RAM_START)
+            in BIOS_START..BIOS_END -> readBuf16(this.bios, masked, BIOS_START)
+
+            else -> {
+                println("read16(0x${masked.toString(16)})")
+                0U
+            }
+        }
+    }
+
+    /**
      * Reads a 32-bit value from the given memory address in little-endian
      * byte ordering.
      */
     fun read32(addr: UInt): UInt {
         return when (val masked = maskSegment(addr)) {
-            in BIOS_START..BIOS_END -> readBios(masked)
+            in RAM_START..RAM_END -> readBuf32(this.ram, masked, RAM_START)
+            in BIOS_START..BIOS_END -> readBuf32(this.bios, masked, BIOS_START)
 
             else -> {
                 println("read32(0x${masked.toString(16)})")
-                0x4CU
+                0U
             }
         }
     }
@@ -57,8 +137,18 @@ class Bus(private val bios: ByteBuffer) {
      * Writes an 8-bit value to the given memory address.
      */
     fun write8(addr: UInt, value: UByte) {
-        // TODO
-        println("write8(0x${addr.toString(16)}, 0x${value.toString(16)})")
+        when (val masked = maskSegment(addr)) {
+            in RAM_START..RAM_END -> writeBuf8(
+                this.ram,
+                masked,
+                RAM_START,
+                value
+            )
+
+            else -> {
+                println("write8(0x${addr.toString(16)}, 0x${value.toString(16)})")
+            }
+        }
     }
 
     /**
@@ -66,8 +156,18 @@ class Bus(private val bios: ByteBuffer) {
      * byte ordering.
      */
     fun write16(addr: UInt, value: UShort) {
-        // TODO
-        println("write16(0x${addr.toString(16)}, 0x${value.toString(16)})")
+        when (val masked = maskSegment(addr)) {
+            in RAM_START..RAM_END -> writeBuf16(
+                this.ram,
+                masked,
+                RAM_START,
+                value
+            )
+
+            else -> {
+                println("write16(0x${addr.toString(16)}, 0x${value.toString(16)})")
+            }
+        }
     }
 
     /**
@@ -75,7 +175,17 @@ class Bus(private val bios: ByteBuffer) {
      * byte ordering.
      */
     fun write32(addr: UInt, value: UInt) {
-        // TODO
-        println("write32(0x${addr.toString(16)}, 0x${value.toString(16)})")
+        when (val masked = maskSegment(addr)) {
+            in RAM_START..RAM_END -> writeBuf32(
+                this.ram,
+                masked,
+                RAM_START,
+                value
+            )
+
+            else -> {
+                println("write32(0x${addr.toString(16)}, 0x${value.toString(16)})")
+            }
+        }
     }
 }

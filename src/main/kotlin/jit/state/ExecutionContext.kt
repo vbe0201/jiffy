@@ -62,6 +62,25 @@ class ExecutionContext(
     }
 
     /**
+     * Reads an 8-bit value from the given memory address through
+     * the CPU bus.
+     */
+    @JvmName("read8")
+    fun read8(addr: UInt): UByte {
+        return this.bus.read8(addr)
+    }
+
+    /**
+     * Reads a 16-bit value from the given memory address through
+     * the CPU bus.
+     */
+    @JvmName("read16")
+    fun read16(addr: UInt): UShort {
+        // TODO: Alignment check.
+        return this.bus.read16(addr)
+    }
+
+    /**
      * Reads a 32-bit value from the given memory address through
      * the CPU bus.
      */

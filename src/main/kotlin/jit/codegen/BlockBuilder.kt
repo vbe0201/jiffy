@@ -56,7 +56,7 @@ private val handlerTable = arrayOf(
     ::unimplemented,
     ::unimplemented,
 
-    ::unimplemented,
+    ::lb,
     ::unimplemented,
     ::unimplemented,
     ::lw,
