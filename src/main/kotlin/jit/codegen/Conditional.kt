@@ -6,6 +6,12 @@ package io.github.vbe0201.jiffy.jit.codegen
 enum class Condition {
     /**
      * Compares two integers on the stack and runs the block
+     * only when these are equal.
+     */
+    INTS_EQUAL,
+
+    /**
+     * Compares two integers on the stack and runs the block
      * only when these are not equal.
      */
     INTS_NOT_EQUAL,

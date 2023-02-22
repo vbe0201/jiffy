@@ -51,6 +51,35 @@ fun jr(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
 }
 
 /**
+ * Generates the Branch Equal (BEQ) instruction to the code buffer.
+ */
+fun beq(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+    emitter.run {
+        getGpr(insn.rs())
+        getGpr(insn.rt())
+
+        // Check the operand registers for equality.
+        conditional(Condition.INTS_EQUAL) {
+            // When the registers are equal, branch to the target.
+            then = {
+                jump {
+                    push(computeBranchTarget(pc, insn.imm()))
+                }
+            }
+
+            // Otherwise, adjust the PC past the branch and its delay slot.
+            orElse = {
+                jump {
+                    push(pc + INSTRUCTION_SIZE * 2U)
+                }
+            }
+        }
+    }
+
+    return Status.FILL_BRANCH_DELAY_SLOT
+}
+
+/**
  * Generates the Branch Not Equal (BNE) instruction to the code buffer.
  */
 fun bne(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {

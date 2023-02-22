@@ -157,6 +157,7 @@ class BytecodeEmitter {
 
             // First, emit the condition to check for.
             when (conditional.cond) {
+                Condition.INTS_EQUAL -> ificmpne(elseLabel)
                 Condition.INTS_NOT_EQUAL -> ificmpeq(elseLabel)
                 Condition.INT_SMALLER_THAN -> ificmpge(elseLabel)
                 Condition.UNSIGNED_INT_SMALLER_THAN -> {
