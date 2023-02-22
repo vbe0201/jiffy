@@ -227,6 +227,30 @@ class BytecodeEmitter {
     }
 
     /**
+     * Gets the value of a given COP0 register.
+     *
+     * The given operation is responsible for placing an integer
+     * register index on the stack.
+     *
+     * NOTE: The value will be written to the given destination
+     * register after a load delay slot.
+     */
+    fun loadCop0RegisterDelayed(reg: UInt, op: BytecodeEmitter.() -> Unit) {
+        this.visitor.run {
+            visitVarInsn(ALOAD, 1)
+            op()
+            invokevirtual(contextClass, "getCop0Register", "(I)I", false)
+
+            // Finish pending memory loads to prevent the last cached value
+            // from being overwritten in consecutive load sequences.
+            finishDelayedLoad()
+
+            visitVarInsn(ISTORE, DELAYED_LOAD_SLOT)
+        }
+        this.pendingLoad = reg
+    }
+
+    /**
      * Sets the COP0 status register to a new value.
      *
      * The given operation is responsible for placing an integer

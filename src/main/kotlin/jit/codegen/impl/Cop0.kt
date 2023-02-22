@@ -10,12 +10,29 @@ internal fun cop0(
     insn: Instruction,
     emitter: BytecodeEmitter
 ): Status {
-    return when (insn.copOpcode()) {
-        0b0100U -> mtc0(pc, insn, emitter)
+    return when (val op = insn.copOpcode()) {
+        0b00000U -> mfc0(pc, insn, emitter)
+        0b00100U -> mtc0(pc, insn, emitter)
 
         // TODO: Figure out a better way to handle invalid instructions.
-        else -> exitProcess(1)
+        else -> {
+            println("Unimplemented coprocessor instruction: $op")
+            exitProcess(1)
+        }
     }
+}
+
+/**
+ * Generates the Move From Coprocessor 0 (MFC0) instruction to
+ * the code buffer.
+ */
+@Suppress("UNUSED_PARAMETER")
+fun mfc0(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+    emitter.loadCop0RegisterDelayed(insn.rt()) {
+        push(insn.rd())
+    }
+
+    return Status.FILL_LOAD_DELAY_SLOT
 }
 
 /**

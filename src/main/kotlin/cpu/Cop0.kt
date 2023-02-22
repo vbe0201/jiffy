@@ -44,6 +44,18 @@ class Cop0 {
     var cause = Cause(0U)
 
     /**
+     * Gets the value of a register with the given index.
+     */
+    fun getRegister(index: UInt): UInt {
+        return when (index) {
+            STATUS_REGISTER -> this.status.raw
+            CAUSE_REGISTER -> this.cause.raw
+
+            else -> 0U
+        }
+    }
+
+    /**
      * Sets the register with the given index to a value.
      */
     fun setRegister(index: UInt, value: UInt) {

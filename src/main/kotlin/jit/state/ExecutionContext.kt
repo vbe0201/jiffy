@@ -54,6 +54,14 @@ class ExecutionContext(
     val lo = 0U
 
     /**
+     * Gets a [Cop0] register at a given index.
+     */
+    @JvmName("getCop0Register")
+    fun getCop0Register(index: UInt): UInt {
+        return this.cop0.getRegister(index)
+    }
+
+    /**
      * Sets a [Cop0] register to a given value.
      */
     @JvmName("setCop0Register")
