@@ -38,6 +38,19 @@ fun jal(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
 }
 
 /**
+ * Generates the Jump Register (JR) instruction to the code buffer.
+ */
+@Suppress("UNUSED_PARAMETER")
+fun jr(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+    // Jump to the address in the given register.
+    emitter.jump {
+        getGpr(insn.rs())
+    }
+
+    return Status.FILL_BRANCH_DELAY_SLOT
+}
+
+/**
  * Generates the Branch Not Equal (BNE) instruction to the code buffer.
  */
 fun bne(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {

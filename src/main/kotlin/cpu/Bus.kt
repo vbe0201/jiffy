@@ -1,6 +1,7 @@
 package io.github.vbe0201.jiffy.cpu
 
 import io.github.vbe0201.jiffy.jit.decoder.Instruction
+import io.github.vbe0201.jiffy.utils.maskSegment
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -8,8 +9,8 @@ private const val KIB = 1 shl 10
 
 private const val BIOS_SIZE = 512 * KIB
 
-const val BIOS_START = 0xBFC0_0000U
-const val BIOS_END = 0xBFC8_0000U
+const val BIOS_START = 0x1FC0_0000U
+const val BIOS_END = 0x1FC8_0000U
 
 /**
  * The memory bus for the PSX CPU.
@@ -42,12 +43,12 @@ class Bus(private val bios: ByteBuffer) {
      * byte ordering.
      */
     fun read32(addr: UInt): UInt {
-        return when (addr) {
-            in BIOS_START..BIOS_END -> readBios(addr)
+        return when (val masked = maskSegment(addr)) {
+            in BIOS_START..BIOS_END -> readBios(masked)
 
             else -> {
-                println("read32(0x${addr.toString(16)})")
-                0U
+                println("read32(0x${masked.toString(16)})")
+                0x4CU
             }
         }
     }
