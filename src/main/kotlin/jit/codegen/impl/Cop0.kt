@@ -3,7 +3,6 @@ package io.github.vbe0201.jiffy.jit.codegen.impl
 import io.github.vbe0201.jiffy.jit.codegen.BytecodeEmitter
 import io.github.vbe0201.jiffy.jit.codegen.Status
 import io.github.vbe0201.jiffy.jit.decoder.Instruction
-import kotlin.system.exitProcess
 
 internal fun cop0(
     pc: UInt,

@@ -214,14 +214,16 @@ class BytecodeEmitter {
      * value to be written on the stack.
      */
     fun setGpr(index: UInt, op: BytecodeEmitter.() -> Unit) {
-        finishDelayedLoad()
-
         this.visitor.run {
             visitVarInsn(ALOAD, 1)
             invokevirtual(contextClass, "getGprs", "()[I", false)
 
             iconst(index.toInt())
             op()
+
+            // Finish a delayed load now that all inputs have been read.
+            finishDelayedLoad()
+
             visitInsn(IASTORE)
         }
     }
