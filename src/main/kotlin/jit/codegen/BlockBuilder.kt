@@ -94,7 +94,7 @@ private val handlerTable = arrayOf(
 ).also { check(it.size == 64) }
 
 private val functionTable = arrayOf(
-    ::unimplemented,
+    ::sll,
     ::unimplemented,
     ::unimplemented,
     ::unimplemented,
@@ -130,13 +130,13 @@ private val functionTable = arrayOf(
     ::unimplemented,
     ::unimplemented,
 
-    ::unimplemented,
+    ::add,
     ::addu,
     ::unimplemented,
     ::unimplemented,
-    ::unimplemented,
+    ::and,
     ::or,
-    ::unimplemented,
+    ::xor,
     ::unimplemented,
 
     ::unimplemented,

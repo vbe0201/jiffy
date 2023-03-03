@@ -3,6 +3,7 @@ package io.github.vbe0201.jiffy.jit.state
 import io.github.vbe0201.jiffy.cpu.BIOS_START
 import io.github.vbe0201.jiffy.cpu.Bus
 import io.github.vbe0201.jiffy.cpu.Cop0
+import io.github.vbe0201.jiffy.cpu.STATUS_REGISTER
 
 /**
  * The execution context of the JIT.
@@ -75,6 +76,9 @@ class ExecutionContext(
      */
     @JvmName("read8")
     fun read8(addr: UInt): UByte {
+        if (this.cop0.status.cacheIsolated()) {
+            return 0U
+        }
         return this.bus.read8(addr)
     }
 
@@ -84,6 +88,9 @@ class ExecutionContext(
      */
     @JvmName("read16")
     fun read16(addr: UInt): UShort {
+        if (this.cop0.status.cacheIsolated()) {
+            return 0U
+        }
         // TODO: Alignment check.
         return this.bus.read16(addr)
     }
@@ -94,6 +101,9 @@ class ExecutionContext(
      */
     @JvmName("read32")
     fun read32(addr: UInt): UInt {
+        if (this.cop0.status.cacheIsolated()) {
+            return 0U
+        }
         // TODO: Alignment check.
         return this.bus.read32(addr)
     }
@@ -104,6 +114,9 @@ class ExecutionContext(
      */
     @JvmName("write8")
     fun write8(addr: UInt, value: UByte) {
+        if (this.cop0.status.cacheIsolated()) {
+            return
+        }
         this.bus.write8(addr, value)
     }
 
@@ -113,6 +126,9 @@ class ExecutionContext(
      */
     @JvmName("write16")
     fun write16(addr: UInt, value: UShort) {
+        if (this.cop0.status.cacheIsolated()) {
+            return
+        }
         // TODO: Alignment check.
         this.bus.write16(addr, value)
     }
@@ -123,6 +139,9 @@ class ExecutionContext(
      */
     @JvmName("write32")
     fun write32(addr: UInt, value: UInt) {
+        if (this.cop0.status.cacheIsolated()) {
+            return
+        }
         // TODO: Alignment check.
         this.bus.write32(addr, value)
     }

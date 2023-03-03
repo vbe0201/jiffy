@@ -14,7 +14,12 @@ const val CAUSE_REGISTER = 13U
  * Representation of the Status Register in CP0.
  */
 @JvmInline
-value class Status(val raw: UInt)
+value class Status(val raw: UInt) {
+    /**
+     * Indicates whether the cache is currently isolated.
+     */
+    fun cacheIsolated(): Boolean = (this.raw and 0x10000U) != 0U
+}
 
 /**
  * Representation of the CAUSE Register in CP0.

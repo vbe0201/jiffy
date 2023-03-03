@@ -96,11 +96,6 @@ class BytecodeEmitter {
         )
     )
 
-    // Local variable slots which may be used during codegen to preserve
-    // values and load them back onto the operand stack at a later time.
-    // Slot 2 is reserved for the value of a delayed load.
-    private var localSlot = 2
-
     // The target register of a pending memory load. By default, this is
     // set to zero since loads to `$zero` would be ignored anyway.
     private var pendingLoad = 0U
@@ -131,9 +126,8 @@ class BytecodeEmitter {
      *
      * Returns the slot index to load the value at a later time.
      */
-    fun storeLocal(): Int {
-        this.visitor.visitVarInsn(ISTORE, ++this.localSlot)
-        return this.localSlot
+    fun storeLocal(slot: Int) {
+        this.visitor.visitVarInsn(ISTORE, slot)
     }
 
     /**
@@ -488,6 +482,38 @@ class BytecodeEmitter {
                 iconst(value.toInt())
             }
             visitInsn(IXOR)
+        }
+    }
+
+    /**
+     * Shifts the value on the operand stack to the left by a
+     * given amount of bits.
+     *
+     * An optional immediate value may be pushed to the stack
+     * as the bits to shift, when supplied.
+     */
+    fun ishl(value: UInt?) {
+        this.visitor.run {
+            if (value != null) {
+                iconst(value.toInt())
+            }
+            visitInsn(ISHL)
+        }
+    }
+
+    /**
+     * Shifts the value on the operand stack to the right by a
+     * given amount of bits.
+     *
+     * An optional immediate value may be pushed to the stack
+     * as the bits to shift, when supplied.
+     */
+    fun ishr(value: UInt?) {
+        this.visitor.run {
+            if (value != null) {
+                iconst(value.toInt())
+            }
+            visitInsn(ISHR)
         }
     }
 
