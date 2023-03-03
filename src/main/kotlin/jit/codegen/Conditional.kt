@@ -29,10 +29,22 @@ enum class Condition {
     UNSIGNED_INT_SMALLER_THAN,
 
     /**
-     * Checks an operand on the stack for smaller than zero and
+     * Tests an operand on the stack for smaller than zero and
      * runs the block only when that is the case.
      */
     SMALLER_THAN_ZERO,
+
+    /**
+     * Tests an operand on the stack for smaller or equal to zero
+     * and runs the block only when that is the case.
+     */
+    SMALLER_OR_EQUAL_ZERO,
+
+    /**
+     * Tests an operand on the stack for greater than zero and
+     * runs the block only when that is the case.
+     */
+    GREATER_THAN_ZERO,
 }
 
 /**

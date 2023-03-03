@@ -17,7 +17,7 @@ private fun computeSignedOverflow(
     action: Conditional.() -> Unit
 ) {
     // Check if an overflow has occurred. This is the case when both
-    // operands have a different sign that the result.
+    // operands have a different sign than the result.
     emitter.run {
         loadLocal(CHECKED_RESULT_SLOT)
         getGpr(insn.rs())

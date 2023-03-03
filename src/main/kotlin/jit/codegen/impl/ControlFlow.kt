@@ -107,3 +107,55 @@ fun bne(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
 
     return Status.FILL_BRANCH_DELAY_SLOT
 }
+
+/**
+ * Generates the Branch if Greater Than Zero (BGTZ) instruction to the
+ * code buffer.
+ */
+fun bgtz(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+    emitter.run {
+        getGpr(insn.rs())
+
+        conditional(Condition.GREATER_THAN_ZERO) {
+            // When the register is greater than zero, branch to target.
+            then = {
+                jump {
+                    push(computeBranchTarget(pc, insn.imm()))
+                }
+            }
+
+            // Otherwise, adjust the PC past the branch and its delay slot.
+            orElse = {
+                jump {
+                    push(pc + INSTRUCTION_SIZE * 2U)
+                }
+            }
+        }
+    }
+
+    return Status.FILL_BRANCH_DELAY_SLOT
+}
+
+fun blez(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+    emitter.run {
+        getGpr(insn.rs())
+
+        conditional(Condition.SMALLER_OR_EQUAL_ZERO) {
+            // When the register is smaller or equal to zero, branch to target.
+            then = {
+                jump {
+                    push(computeBranchTarget(pc, insn.imm()))
+                }
+            }
+
+            // Otherwise, adjust the PC past the branch and its delay slot.
+            orElse = {
+                jump {
+                    push(pc + INSTRUCTION_SIZE * 2U)
+                }
+            }
+        }
+    }
+
+    return Status.FILL_BRANCH_DELAY_SLOT
+}

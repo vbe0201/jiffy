@@ -26,8 +26,8 @@ private val handlerTable = arrayOf(
     ::jal,
     ::beq,
     ::bne,
-    ::unimplemented,
-    ::unimplemented,
+    ::blez,
+    ::bgtz,
 
     ::addi,
     ::addiu,

@@ -163,8 +163,9 @@ class BytecodeEmitter {
                     )
                     ifge(elseLabel)
                 }
-
                 Condition.SMALLER_THAN_ZERO -> ifge(elseLabel)
+                Condition.SMALLER_OR_EQUAL_ZERO -> ifgt(elseLabel)
+                Condition.GREATER_THAN_ZERO -> ifle(elseLabel)
             }
 
             val orElse = conditional.orElse
