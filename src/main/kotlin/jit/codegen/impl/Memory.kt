@@ -10,7 +10,50 @@ import io.github.vbe0201.jiffy.utils.signExtend32
  */
 @Suppress("UNUSED_PARAMETER")
 fun lb(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
-    emitter.loadBusDelayed8(insn.rt()) {
+    emitter.loadBusDelayed8(insn.rt(), false) {
+        // Compute the memory address to read from.
+        getGpr(insn.rs())
+        iadd(insn.imm().signExtend32())
+    }
+
+    return Status.FILL_LOAD_DELAY_SLOT
+}
+
+/**
+ * Generates the Load Byte Unsigned (LBU) instruction to the code buffer.
+ */
+@Suppress("UNUSED_PARAMETER")
+fun lbu(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+    emitter.loadBusDelayed8(insn.rt(), true) {
+        // Compute the memory address to read from.
+        getGpr(insn.rs())
+        iadd(insn.imm().signExtend32())
+    }
+
+    return Status.FILL_LOAD_DELAY_SLOT
+}
+
+/**
+ * Generates the Load Halfword (LH) instruction to the code buffer.
+ */
+@Suppress("UNUSED_PARAMETER")
+fun lh(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+    emitter.loadBusDelayed16(insn.rt(), false) {
+        // Compute the memory address to read from.
+        getGpr(insn.rs())
+        iadd(insn.imm().signExtend32())
+    }
+
+    return Status.FILL_LOAD_DELAY_SLOT
+}
+
+/**
+ * Generates the Load Halfword Unsigned (LHU) instruction to the
+ * code buffer.
+ */
+@Suppress("UNUSED_PARAMETER")
+fun lhu(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+    emitter.loadBusDelayed16(insn.rt(), true) {
         // Compute the memory address to read from.
         getGpr(insn.rs())
         iadd(insn.imm().signExtend32())

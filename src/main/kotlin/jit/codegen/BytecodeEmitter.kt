@@ -154,6 +154,7 @@ class BytecodeEmitter {
                 Condition.INTS_EQUAL -> ificmpne(elseLabel)
                 Condition.INTS_NOT_EQUAL -> ificmpeq(elseLabel)
                 Condition.INT_SMALLER_THAN -> ificmpge(elseLabel)
+
                 Condition.UNSIGNED_INT_SMALLER_THAN -> {
                     invokestatic(
                         "java/lang/Integer",
@@ -163,6 +164,7 @@ class BytecodeEmitter {
                     )
                     ifge(elseLabel)
                 }
+
                 Condition.SMALLER_THAN_ZERO -> ifge(elseLabel)
                 Condition.SMALLER_OR_EQUAL_ZERO -> ifgt(elseLabel)
                 Condition.GREATER_THAN_ZERO -> ifle(elseLabel)
@@ -285,11 +287,21 @@ class BytecodeEmitter {
      * Since this handles the delay slot, the result will not be
      * visible before the next instruction has finished executing.
      */
-    fun loadBusDelayed8(reg: UInt, op: BytecodeEmitter.() -> Unit) {
+    fun loadBusDelayed8(
+        reg: UInt,
+        unsigned: Boolean,
+        op: BytecodeEmitter.() -> Unit
+    ) {
         this.visitor.run {
             visitVarInsn(ALOAD, 1)
             op()
             invokevirtual(contextClass, "read8", "(I)B", false)
+
+            // By nature of how the JVM works, this byte is sign-extended
+            // to int. When this is not desired, truncate the sign bits.
+            if (unsigned) {
+                iand(0xFFU)
+            }
 
             // Finish pending memory loads to prevent the last cached value
             // from being overwritten in consecutive load sequences.
@@ -309,11 +321,23 @@ class BytecodeEmitter {
      * Since this handles the delay slot, the result will not be
      * visible before the next instruction has finished executing.
      */
-    fun loadBusDelayed16(reg: UInt, op: BytecodeEmitter.() -> Unit) {
+    fun loadBusDelayed16(
+        reg: UInt,
+        unsigned: Boolean,
+        op: BytecodeEmitter.() -> Unit
+    ) {
         this.visitor.run {
             visitVarInsn(ALOAD, 1)
             op()
             invokevirtual(contextClass, "read16", "(I)S", false)
+
+            // TODO: Unaligned load exception handling.
+
+            // By nature of how the JVM works, this short is sign-extended
+            // to int. When this is not desired, truncate the sign bits.
+            if (unsigned) {
+                iand(0xFFFFU)
+            }
 
             // Finish pending memory loads to prevent the last cached value
             // from being overwritten in consecutive load sequences.
@@ -338,6 +362,8 @@ class BytecodeEmitter {
             visitVarInsn(ALOAD, 1)
             op()
             invokevirtual(contextClass, "read32", "(I)I", false)
+
+            // TODO: Unaligned load exception handling.
 
             // Finish pending memory loads to prevent the last cached value
             // from being overwritten in consecutive load sequences.
