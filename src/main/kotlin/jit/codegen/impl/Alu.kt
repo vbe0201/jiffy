@@ -167,6 +167,19 @@ fun ori(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
 }
 
 /**
+ * Generates the XOR Immediate (XORI) instruction to the code buffer.
+ */
+@Suppress("UNUSED_PARAMETER")
+fun xori(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+    emitter.setGpr(insn.rt()) {
+        getGpr(insn.rs())
+        ixor(insn.imm().zeroExtend32())
+    }
+
+    return Status.CONTINUE_BLOCK
+}
+
+/**
  * Generates the AND instruction to the code buffer.
  */
 @Suppress("UNUSED_PARAMETER")
@@ -217,6 +230,44 @@ fun sll(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
     emitter.setGpr(insn.rd()) {
         getGpr(insn.rt())
         ishl(insn.shamt())
+    }
+
+    return Status.CONTINUE_BLOCK
+}
+
+/**
+ * Generates the Set if Less Than Immediate (SLTI) instruction
+ * to the code buffer.
+ */
+@Suppress("UNUSED_PARAMETER")
+fun slti(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+    emitter.setGpr(insn.rt()) {
+        getGpr(insn.rs())
+        push(insn.imm().signExtend32())
+
+        conditional(Condition.INT_SMALLER_THAN) {
+            then = { push(1U) }
+            orElse = { push(0U) }
+        }
+    }
+
+    return Status.CONTINUE_BLOCK
+}
+
+/**
+ * Generates the Set if Less Than Immediate Unsigned (SLTIU)
+ * instruction to the code buffer.
+ */
+@Suppress("UNUSED_PARAMETER")
+fun sltiu(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+    emitter.setGpr(insn.rt()) {
+        getGpr(insn.rs())
+        push(insn.imm().signExtend32())
+
+        conditional(Condition.UNSIGNED_INT_SMALLER_THAN) {
+            then = { push(1U) }
+            orElse = { push(0U) }
+        }
     }
 
     return Status.CONTINUE_BLOCK

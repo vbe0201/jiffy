@@ -31,11 +31,11 @@ private val handlerTable = arrayOf(
 
     ::addi,
     ::addiu,
-    ::unimplemented,
-    ::unimplemented,
+    ::slti,
+    ::sltiu,
     ::andi,
     ::ori,
-    ::unimplemented,
+    ::xori,
     ::lui,
 
     ::cop0,
