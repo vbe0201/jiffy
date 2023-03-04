@@ -11,7 +11,7 @@ import io.github.vbe0201.jiffy.utils.*
 // Reserved local variable slot for checked results of computations.
 private const val CHECKED_RESULT_SLOT = 3
 
-private fun computeSignedOverflow(
+private fun computeSignedOverflowAddition(
     insn: Instruction,
     emitter: BytecodeEmitter,
     action: Conditional.() -> Unit
@@ -30,6 +30,28 @@ private fun computeSignedOverflow(
         } else {
             ixor(insn.imm().signExtend32())
         }
+
+        iand(null)
+        conditional(Condition.SMALLER_THAN_ZERO, action)
+    }
+}
+
+private fun computeSignedOverflowSubtraction(
+    insn: Instruction,
+    emitter: BytecodeEmitter,
+    action: Conditional.() -> Unit
+) {
+    // Check if an overflow has occurred. This is the case when both
+    // operands have different signs and the result has a different
+    // sign than the first operand.
+    emitter.run {
+        getGpr(insn.rs())
+        getGpr(insn.rt())
+        ixor(null)
+
+        getGpr(insn.rs())
+        loadLocal(CHECKED_RESULT_SLOT)
+        ixor(null)
 
         iand(null)
         conditional(Condition.SMALLER_THAN_ZERO, action)
@@ -66,7 +88,7 @@ fun add(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
     }
 
     // Check for signed overflow.
-    computeSignedOverflow(insn, emitter) {
+    computeSignedOverflowAddition(insn, emitter) {
         then = {
             // TODO: Raise an exception for overflow.
             generateUnimplementedStub()
@@ -96,7 +118,7 @@ fun addi(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
     }
 
     // Check for signed overflow.
-    computeSignedOverflow(insn, emitter) {
+    computeSignedOverflowAddition(insn, emitter) {
         then = {
             // TODO: Raise an exception for overflow.
             generateUnimplementedStub()
@@ -122,6 +144,51 @@ fun addu(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
         getGpr(insn.rs())
         getGpr(insn.rt())
         iadd(null)
+    }
+
+    return Status.CONTINUE_BLOCK
+}
+
+/**
+ * Generates the Subtract (SUB) instruction to the code buffer.
+ */
+@Suppress("UNUSED_PARAMETER")
+fun sub(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+    // Compute the diff of both operands and store as local variable.
+    emitter.run {
+        getGpr(insn.rs())
+        getGpr(insn.rt())
+        isub(null)
+        storeLocal(CHECKED_RESULT_SLOT)
+    }
+
+    // Check for signed overflow
+    computeSignedOverflowSubtraction(insn, emitter) {
+        then = {
+            // TODO: Raise an exception for overflow.
+            generateUnimplementedStub()
+        }
+
+        orElse = {
+            // When we were successful, write the diff to output.
+            setGpr(insn.rd()) {
+                loadLocal(CHECKED_RESULT_SLOT)
+            }
+        }
+    }
+
+    return Status.CONTINUE_BLOCK
+}
+
+/**
+ * Generates the Subtract Unsigned (SUBU) instruction to the code buffer.
+ */
+@Suppress("UNUSED_PARAMETER")
+fun subu(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+    emitter.setGpr(insn.rd()) {
+        getGpr(insn.rs())
+        getGpr(insn.rt())
+        isub(null)
     }
 
     return Status.CONTINUE_BLOCK

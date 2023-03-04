@@ -465,6 +465,22 @@ class BytecodeEmitter {
     }
 
     /**
+     * Subtracts two values on the operand stack and leaves the
+     * result on top of the stack.
+     *
+     * An optional immediate value may be pushed to the stack
+     * before the operation, when supplied.
+     */
+    fun isub(value: UInt?) {
+        this.visitor.run {
+            if (value != null) {
+                iconst(value.toInt())
+            }
+            visitInsn(ISUB)
+        }
+    }
+
+    /**
      * Bitwise ANDs two values on the operand stack and leaves the
      * result on top of the stack.
      *
