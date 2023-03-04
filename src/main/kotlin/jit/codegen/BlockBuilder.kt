@@ -104,7 +104,7 @@ private val functionTable = arrayOf(
     ::srav,
 
     ::jr,
-    ::unimplemented,
+    ::jalr,
     ::unimplemented,
     ::unimplemented,
     ::unimplemented,

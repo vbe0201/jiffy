@@ -33,8 +33,28 @@ fun jal(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
         push(pc + INSTRUCTION_SIZE * 2U)
     }
 
-    // Perform a regular jump to the destination.
+    // Jump to the destination.
     return j(pc, insn, emitter)
+}
+
+/**
+ * Generates the Jump And Link Register (JALR) instruction to the
+ * code buffer.
+ */
+fun jalr(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+    emitter.run {
+        // Store the return address in the selected register.
+        setGpr(insn.rd()) {
+            push(pc + INSTRUCTION_SIZE * 2U)
+        }
+
+        // Jump to the destination.
+        jump {
+            push(insn.rs())
+        }
+    }
+
+    return Status.FILL_BRANCH_DELAY_SLOT
 }
 
 /**
