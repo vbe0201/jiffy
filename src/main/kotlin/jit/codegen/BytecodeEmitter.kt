@@ -530,7 +530,7 @@ class BytecodeEmitter {
 
     /**
      * Shifts the value on the operand stack to the right by a
-     * given amount of bits.
+     * given amount of bits (arithmetic).
      *
      * An optional immediate value may be pushed to the stack
      * as the bits to shift, when supplied.
@@ -541,6 +541,22 @@ class BytecodeEmitter {
                 iconst(value.toInt())
             }
             visitInsn(ISHR)
+        }
+    }
+
+    /**
+     * Shifts the value on the operand stack to the right by a
+     * given amount of bits (logical).
+     *
+     * An optional immediate value may be pushed to the stack
+     * as the bits to shift, when supplied.
+     */
+    fun iushr(value: UInt?) {
+        this.visitor.run {
+            if (value != null) {
+                iconst(value.toInt())
+            }
+            visitInsn(IUSHR)
         }
     }
 

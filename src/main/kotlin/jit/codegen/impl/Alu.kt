@@ -222,6 +222,24 @@ fun xor(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
 }
 
 /**
+ * Generates the bitwise NOT OR (NOR) instruction to the code buffer.
+ */
+@Suppress("UNUSED_PARAMETER")
+fun nor(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+    emitter.setGpr(insn.rd()) {
+        // Bitwise OR both registers together.
+        getGpr(insn.rs())
+        getGpr(insn.rt())
+        ior(null)
+
+        // Compute the complement of the resulting value.
+        ixor((-1).toUInt())
+    }
+
+    return Status.CONTINUE_BLOCK
+}
+
+/**
  * Generates the Shift Left Logical (SLL) instruction to the
  * code buffer.
  */
@@ -230,6 +248,88 @@ fun sll(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
     emitter.setGpr(insn.rd()) {
         getGpr(insn.rt())
         ishl(insn.shamt())
+    }
+
+    return Status.CONTINUE_BLOCK
+}
+
+/**
+ * Generates the Shift Left Logical Variable (SLLV) instruction
+ * to the code buffer.
+ */
+@Suppress("UNUSED_PARAMETER")
+fun sllv(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+    emitter.setGpr(insn.rd()) {
+        getGpr(insn.rt())
+        getGpr(insn.rs())
+
+        // NOTE: The ISHL instruction truncates the S register
+        // to 5 bits already, as defined by the MIPS architecture.
+        ishl(null)
+    }
+
+    return Status.CONTINUE_BLOCK
+}
+
+/**
+ * Generates the Shift Right Logical (SRL) instruction to the
+ * code buffer.
+ */
+@Suppress("UNUSED_PARAMETER")
+fun srl(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+    emitter.setGpr(insn.rd()) {
+        getGpr(insn.rt())
+        iushr(insn.shamt())
+    }
+
+    return Status.CONTINUE_BLOCK
+}
+
+/**
+ * Generates the Shift Right Logical Variable (SRLV) instruction
+ * to the code buffer.
+ */
+@Suppress("UNUSED_PARAMETER")
+fun srlv(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+    emitter.setGpr(insn.rd()) {
+        getGpr(insn.rt())
+        getGpr(insn.rs())
+
+        // NOTE: The IUSHR instruction truncates the S register
+        // to 5 bits already, as defined by the MIPS architecture.
+        iushr(null)
+    }
+
+    return Status.CONTINUE_BLOCK
+}
+
+/**
+ * Generates the Shift Right Arithmetic (SRA) instruction to the
+ * code buffer.
+ */
+@Suppress("UNUSED_PARAMETER")
+fun sra(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+    emitter.setGpr(insn.rd()) {
+        getGpr(insn.rt())
+        ishr(insn.shamt())
+    }
+
+    return Status.CONTINUE_BLOCK
+}
+
+/**
+ * Generates the Shift Right Arithmetic Variable (SRLV) instruction
+ * to the code buffer.
+ */
+@Suppress("UNUSED_PARAMETER")
+fun srav(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+    emitter.setGpr(insn.rd()) {
+        getGpr(insn.rt())
+        getGpr(insn.rs())
+
+        // NOTE: The ISHR instruction truncates the S register
+        // to 5 bits already, as defined by the MIPS architecture.
+        ishr(null)
     }
 
     return Status.CONTINUE_BLOCK
@@ -265,6 +365,24 @@ fun sltiu(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
         push(insn.imm().signExtend32())
 
         conditional(Condition.UNSIGNED_INT_SMALLER_THAN) {
+            then = { push(1U) }
+            orElse = { push(0U) }
+        }
+    }
+
+    return Status.CONTINUE_BLOCK
+}
+
+/**
+ * Generates the Set on Less Than (SLT) instruction to the code buffer.
+ */
+@Suppress("UNUSED_PARAMETER")
+fun slt(pc: UInt, insn: Instruction, emitter: BytecodeEmitter): Status {
+    emitter.setGpr(insn.rd()) {
+        getGpr(insn.rs())
+        getGpr(insn.rt())
+
+        conditional(Condition.INT_SMALLER_THAN) {
             then = { push(1U) }
             orElse = { push(0U) }
         }
