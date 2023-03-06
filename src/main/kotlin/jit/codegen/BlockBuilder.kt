@@ -1,214 +1,41 @@
 package io.github.vbe0201.jiffy.jit.codegen
 
-import io.github.vbe0201.jiffy.jit.codegen.impl.*
+import io.github.vbe0201.jiffy.jit.codegen.jvm.BytecodeEmitter
 import io.github.vbe0201.jiffy.jit.decoder.INSTRUCTION_SIZE
-import io.github.vbe0201.jiffy.jit.decoder.Instruction
 import io.github.vbe0201.jiffy.jit.state.ExecutionContext
-import kotlin.system.exitProcess
-
-private fun function(
-    pc: UInt,
-    insn: Instruction,
-    emitter: BytecodeEmitter
-): Status {
-    // TODO: Figure out a more elegant way to handle invalid instructions.
-    val func = insn.function() ?: exitProcess(1)
-
-    // Delegate to the corresponding entry in the functions table.
-    val handler = functionTable[func.opcode.toInt()]
-    return handler(pc, insn, emitter)
-}
-
-private val handlerTable = arrayOf(
-    ::function,
-    ::unimplemented,
-    ::j,
-    ::jal,
-    ::beq,
-    ::bne,
-    ::blez,
-    ::bgtz,
-
-    ::addi,
-    ::addiu,
-    ::slti,
-    ::sltiu,
-    ::andi,
-    ::ori,
-    ::xori,
-    ::lui,
-
-    ::cop0,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-
-    ::lb,
-    ::lh,
-    ::unimplemented,
-    ::lw,
-    ::lbu,
-    ::lhu,
-    ::unimplemented,
-    ::unimplemented,
-
-    ::sb,
-    ::sh,
-    ::unimplemented,
-    ::sw,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-).also { check(it.size == 64) }
-
-private val functionTable = arrayOf(
-    ::sll,
-    ::unimplemented,
-    ::srl,
-    ::sra,
-    ::sllv,
-    ::unimplemented,
-    ::srlv,
-    ::srav,
-
-    ::jr,
-    ::jalr,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-
-    ::add,
-    ::addu,
-    ::sub,
-    ::subu,
-    ::and,
-    ::or,
-    ::xor,
-    ::nor,
-
-    ::unimplemented,
-    ::unimplemented,
-    ::slt,
-    ::sltu,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
-).also { check(it.size == 64) }
 
 /**
- * Wraps a [BytecodeEmitter] and emits blocks of code to it.
+ * Translates a block of machine code to Java bytecode using the
+ * provided [BytecodeEmitter].
  *
  * A block starts at any requested address and ends with a branch
- * instruction to the next target.
+ * instruction to the next block.
  *
  * After code has been emitted, [BytecodeEmitter.finish] may be
  * called on the underlying object.
  */
 class BlockBuilder(
     /**
-     * The [BytecodeEmitter] to populate.
+     * The underlying [BytecodeEmitter] to emit code to.
      */
-    val emitter: BytecodeEmitter
+    val emitter: BytecodeEmitter,
 ) {
-    /**
-     * Indicates whether an [Instruction] should be emitted.
-     *
-     * This is a shortcut to filter out instructions that do not require
-     * codegen to achieve semantic equivalence in emulation.
-     */
-    private fun shouldEmit(insn: Instruction): Boolean {
-        // All-zero instructions are NOPs. We do not care about those.
-        return insn.raw != 0U
-    }
+    private val optimizer = Optimizer(this.emitter)
 
-    /**
-     * Fetches the next [Instruction] from the given [ExecutionContext]
-     * and adds it to the block of generated code.
-     *
-     * Returns the translation [Status] of the instruction.
-     */
-    private fun addInstruction(context: ExecutionContext, addr: UInt): Status {
-        val insn = context.bus.readInstruction(addr)
+    private fun emitInstruction(
+        context: ExecutionContext,
+        addr: UInt,
+        previousStatus: Status
+    ): Status {
+        // Read the instruction and construct its metadata.
+        val meta = InstructionMeta(
+            context.bus.readInstruction(addr),
+            addr,
+            previousStatus === Status.FILL_BRANCH_DELAY_SLOT
+        )
 
-        if (shouldEmit(insn)) {
-            // TODO: Figure out a nicer way to handle invalid instructions.
-            val kind = insn.kind() ?: exitProcess(1)
-
-            // Find the handler for the instruction and invoke it.
-            val handler = handlerTable[kind.opcode.toInt()]
-            return handler(addr, insn, this.emitter)
+        if (!this.optimizer.runInstructionFilters(meta)) {
+            return dispatch(meta, this.emitter)
         }
 
         return Status.CONTINUE_BLOCK
@@ -216,46 +43,46 @@ class BlockBuilder(
 
     /**
      * Builds a block of code out of the [ExecutionContext], starting
-     * at a given address.
+     * at a given MIPS address.
      *
-     * Returns the size of all MIPS instructions governed by the resulting
-     * block in bytes.
+     * Returns the size of all MIPS instructions in the block in bytes.
      *
-     * The resulting code will be emitted to the inner [BytecodeEmitter].
+     * The generated Java Bytecode can be obtained through calling
+     * [BytecodeEmitter.finish].
      */
     fun build(context: ExecutionContext, addr: UInt): UInt {
-        var processed = 0U
+        var count = 0U
 
         // Emit more instructions until the block is complete.
         var status = Status.CONTINUE_BLOCK
         while (status.blockOpen()) {
-            val nextStatus = addInstruction(context, addr + processed)
+            val nextStatus = emitInstruction(context, addr + count, status)
 
             // When we have a branch delay slot to handle from the
             // previous instruction, we need to finish it after the
             // next instruction has executed.
             //
-            // Note that branch delay slots are additionally taken
-            // care of at register writes and additional memory loads.
-            // This handles the case where none of these things happen.
+            // Note that load delay slots are additionally taken care
+            // of at register writes and memory reads. This handles
+            // the case where none of these operations are performed.
             if (status == Status.FILL_LOAD_DELAY_SLOT) {
                 this.emitter.finishDelayedLoad()
             }
 
             status = nextStatus
-            processed += INSTRUCTION_SIZE
+            count += INSTRUCTION_SIZE
         }
 
-        // Check if we need to emit an additional instruction
-        // for the pipeline delay slot after a branch.
+        // Check if we need to emit an additional instruction for the
+        // pipeline delay slot after a branch.
         //
-        // NOTE: Multiple consecutive branches are forbidden
-        // by the MIPS manual, so we don't need to handle this.
+        // NOTE: Multiple consecutive branches are bogus and forbidden
+        // by the MIPS manual, so we don't need to handle that.
         if (status == Status.FILL_BRANCH_DELAY_SLOT) {
-            addInstruction(context, addr + processed)
-            processed += INSTRUCTION_SIZE
+            emitInstruction(context, addr + count, status)
+            count += INSTRUCTION_SIZE
         }
 
-        return processed
+        return count
     }
 }

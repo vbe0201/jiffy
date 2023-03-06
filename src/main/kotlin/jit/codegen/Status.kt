@@ -5,12 +5,12 @@ package io.github.vbe0201.jiffy.jit.codegen
  * instruction.
  *
  * [Status]es provide a way for instructions to provide additional
- * context to the [BlockBuilder] on their own.
+ * context to the [BlockBuilder] on how to proceed.
  */
 enum class Status(private val mask: Int) {
     /**
      * The block will consume more instructions until a different
-     * [Status] occurs.
+     * [Status] condition occurs.
      */
     CONTINUE_BLOCK(0b0001),
 
@@ -21,8 +21,8 @@ enum class Status(private val mask: Int) {
     FILL_LOAD_DELAY_SLOT(0b0010),
 
     /**
-     * The block ends, but the delay slot needs to be filled with
-     * the next instruction.
+     * The block ends, but the branch delay slot needs to be filled
+     * with the next instruction before that.
      */
     FILL_BRANCH_DELAY_SLOT(0b0100),
 
@@ -34,10 +34,10 @@ enum class Status(private val mask: Int) {
     /**
      * Indicates whether the block is still taking more instructions in.
      */
-    fun blockOpen(): Boolean = (this.mask and 0b0011) != 0
+    fun blockOpen() = (this.mask and 0b0011) != 0
 
     /**
-     * Indicates whether an instruction caused a delay slot.
+     * Indicates whether the next instruction executes in a delay slot.
      */
-    fun delaySlot(): Boolean = (this.mask and 0b0110) != 0
+    fun delaySlot() = (this.mask and 0b0110) != 0
 }

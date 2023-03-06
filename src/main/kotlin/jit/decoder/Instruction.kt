@@ -28,14 +28,14 @@ value class Instruction(val raw: UInt) {
      *
      * The resulting value is only valid for I and R form instructions.
      */
-    fun rs(): UInt = (raw shr 21) and 0x1FU
+    fun rs() = Register(((raw shr 21) and 0x1FU).toInt())
 
     /**
      * Extracts the rt operand of this instruction.
      *
      * The resulting value is only valid for I and R form instructions.
      */
-    fun rt(): UInt = (raw shr 16) and 0x1FU
+    fun rt() = Register(((raw shr 16) and 0x1FU).toInt())
 
     /**
      * Gets the imm operand of this instruction.
@@ -43,40 +43,40 @@ value class Instruction(val raw: UInt) {
      * The resulting value is only valid for I form instructions and may be
      * sign or zero extended to 32 bits, depending on the instruction.
      */
-    fun imm(): UShort = (raw and 0xFFFFU).toUShort()
+    fun imm() = (raw and 0xFFFFU).toUShort()
 
     /**
      * Extracts the coprocessor opcode of this instruction.
      *
      * The resulting value is only valid for coprocessor instructions.
      */
-    fun copOpcode(): UInt = (raw shr 21) and 0x1FU
+    fun copOpcode() = (raw shr 21) and 0x1FU
 
     /**
      * Gets the imm25 operand of this instruction.
      *
      * The resulting value is only valid for coprocessor instructions.
      */
-    fun imm25(): UInt = raw and 0x1FF_FFFFU
+    fun imm25() = raw and 0x1FF_FFFFU
 
     /**
      * Extracts the rd operand of this instruction.
      *
      * The resulting value is only valid for R form instructions.
      */
-    fun rd(): UInt = (raw shr 11) and 0x1FU
+    fun rd() = Register(((raw shr 11) and 0x1FU).toInt())
 
     /**
      * Extracts the shamt operand of this instruction.
      *
      * The resulting value is only valid for R form instructions.
      */
-    fun shamt(): UInt = (raw shr 6) and 0x1FU
+    fun shamt() = (raw shr 6) and 0x1FU
 
     /**
      * Extracts the target operand of this instruction.
      *
      * The resulting value is only valid for J form instructions.
      */
-    fun target(): UInt = raw and 0x3FFFFFFU
+    fun target() = raw and 0x3FFFFFFU
 }

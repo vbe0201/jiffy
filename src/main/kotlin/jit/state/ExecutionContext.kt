@@ -3,7 +3,6 @@ package io.github.vbe0201.jiffy.jit.state
 import io.github.vbe0201.jiffy.cpu.BIOS_START
 import io.github.vbe0201.jiffy.cpu.Bus
 import io.github.vbe0201.jiffy.cpu.Cop0
-import io.github.vbe0201.jiffy.cpu.STATUS_REGISTER
 
 /**
  * The execution context of the JIT.
@@ -46,13 +45,15 @@ class ExecutionContext(
      * The special-purpose register which holds the high 32 bits of
      * multiplication result; remainder of division.
      */
-    val hi = 0U
+    @set:JvmName("setHi")
+    var hi = 0U
 
     /**
      * The special-purpose register which holds the low 32 bits of
      * multiplication result; quotient of division.
      */
-    val lo = 0U
+    @set:JvmName("setLo")
+    var lo = 0U
 
     /**
      * Gets a [Cop0] register at a given index.

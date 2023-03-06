@@ -1,7 +1,7 @@
 package io.github.vbe0201.jiffy.jit.translation
 
 import io.github.vbe0201.jiffy.jit.codegen.BlockBuilder
-import io.github.vbe0201.jiffy.jit.codegen.BytecodeEmitter
+import io.github.vbe0201.jiffy.jit.codegen.jvm.BytecodeEmitter
 import io.github.vbe0201.jiffy.jit.state.ExecutionContext
 import io.github.vbe0201.jiffy.jit.state.State
 

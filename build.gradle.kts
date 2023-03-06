@@ -32,6 +32,7 @@ kotlin {
 
 tasks.withType<KotlinCompile>().all {
     kotlinOptions.freeCompilerArgs += "-opt-in=kotlin.ExperimentalUnsignedTypes"
+    kotlinOptions.freeCompilerArgs += "-Xcontext-receivers"
 }
 
 application {
