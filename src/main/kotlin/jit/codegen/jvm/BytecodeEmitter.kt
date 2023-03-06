@@ -271,6 +271,8 @@ class BytecodeEmitter {
                 JvmType.INT -> contextCall("write32", "(II)V")
                 JvmType.LONG -> throw AssertionError()
             }
+
+            // TODO: Unaligned write exception handling.
         }
     }
 
