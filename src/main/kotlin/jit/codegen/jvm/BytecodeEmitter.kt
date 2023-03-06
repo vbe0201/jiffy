@@ -231,7 +231,7 @@ class BytecodeEmitter {
      */
     fun loadBus(
         res: JvmType,
-        op: BytecodeEmitter.() -> Operand
+        op: BytecodeEmitter.() -> Unit
     ): Operand {
         this.raw.run {
             visitVarInsn(ALOAD, 1)
