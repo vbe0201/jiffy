@@ -12,7 +12,7 @@ import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.Type
 
 private const val WRITER_FLAGS =
-    ClassWriter.COMPUTE_FRAMES + ClassWriter.COMPUTE_MAXS
+    ClassWriter.COMPUTE_FRAMES or ClassWriter.COMPUTE_MAXS
 
 // The only officially supported JDK by jiffy is 19.
 // When bumping to a newer version, also change this constant.
