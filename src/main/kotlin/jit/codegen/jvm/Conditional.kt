@@ -8,13 +8,13 @@ enum class Condition {
      * Compares two integer operands on the stack and runs a block
      * only when first and second are equal.
      */
-    INTS_EQUAL,
+    COMPARE_EQUAL,
 
     /**
      * Compares two integer operands on the stack and runs a block
      * only when first and second are not equal.
      */
-    INTS_NOT_EQUAL,
+    COMPARE_NOT_EQUAL,
 
     /**
      * Compares two integer operands on the stack and runs a block

@@ -332,8 +332,8 @@ class BytecodeEmitter {
             // First, emit the condition to not check for.
             // We want to hit the else label in that case.
             when (conditional.cond) {
-                Condition.INTS_EQUAL -> ificmpne(elseLabel)
-                Condition.INTS_NOT_EQUAL -> ificmpeq(elseLabel)
+                Condition.COMPARE_EQUAL -> ificmpne(elseLabel)
+                Condition.COMPARE_NOT_EQUAL -> ificmpeq(elseLabel)
 
                 Condition.COMPARE_SMALLER_THAN -> ificmpge(elseLabel)
                 Condition.COMPARE_UNSIGNED_SMALLER_THAN -> {
