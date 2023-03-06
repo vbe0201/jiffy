@@ -43,6 +43,12 @@ enum class Condition {
     INT_SMALLER_OR_EQUAL_ZERO,
 
     /**
+     * Tests an integer operand for equality to 0 and runs a
+     * block only when that is the case.
+     */
+    INT_ZERO,
+
+    /**
      * Tests an integer operand for greater than zero and
      * runs a block only when that is the case.
      */
@@ -56,10 +62,10 @@ data class Conditional(val cond: Condition) {
     /**
      * Codegen callback for when a [Condition] is met.
      */
-    val then: (BytecodeEmitter.() -> Unit)? = null
+    var then: (BytecodeEmitter.() -> Unit)? = null
 
     /**
      * Optional codegen callback for when a [Condition] failed.
      */
-    val orElse: (BytecodeEmitter.() -> Unit)? = null
+    var orElse: (BytecodeEmitter.() -> Unit)? = null
 }

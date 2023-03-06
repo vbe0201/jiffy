@@ -348,6 +348,7 @@ class BytecodeEmitter {
 
                 Condition.INT_SMALLER_THAN_ZERO -> ifge(elseLabel)
                 Condition.INT_SMALLER_OR_EQUAL_ZERO -> ifgt(elseLabel)
+                Condition.INT_ZERO -> ifne(elseLabel)
                 Condition.INT_GREATER_THAN_ZERO -> ifle(elseLabel)
             }
 

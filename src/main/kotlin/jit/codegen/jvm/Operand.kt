@@ -45,6 +45,11 @@ value class Operand(val type: JvmType) {
     }
 
     context(BytecodeEmitter)
+    inline fun rem(op: BytecodeEmitter.() -> Unit): Operand {
+        return stackedOp(this.type.rem, op)
+    }
+
+    context(BytecodeEmitter)
     inline fun div(op: BytecodeEmitter.() -> Unit): Operand {
         return stackedOp(this.type.div, op)
     }

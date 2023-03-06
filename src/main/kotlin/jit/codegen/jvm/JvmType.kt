@@ -32,6 +32,7 @@ enum class JvmType(val mask: UInt, private val ty: Type) {
     val add: Int = this.ty.getOpcode(Opcodes.IADD)
     val sub: Int = this.ty.getOpcode(Opcodes.ISUB)
     val mult: Int = this.ty.getOpcode(Opcodes.IMUL)
+    val rem: Int = this.ty.getOpcode(Opcodes.IREM)
     val div: Int = this.ty.getOpcode(Opcodes.IDIV)
     val and: Int = this.ty.getOpcode(Opcodes.IAND)
     val or: Int = this.ty.getOpcode(Opcodes.IOR)
