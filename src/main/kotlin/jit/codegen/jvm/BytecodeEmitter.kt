@@ -150,8 +150,9 @@ class BytecodeEmitter {
     /**
      * Places an integer value on top of the JVM operand stack.
      */
-    fun place(value: Int) {
+    inline fun place(value: Int): Operand {
         this.raw.iconst(value)
+        return Operand(JvmType.INT)
     }
 
     /**
