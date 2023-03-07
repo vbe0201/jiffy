@@ -216,6 +216,11 @@ class BytecodeEmitter {
             visitVarInsn(ALOAD, 1)
             iconst(reg.index)
             op()
+
+            // Finish a delayed load now that all inputs have been read,
+            // and before the output register is written below.
+            finishDelayedLoad()
+
             contextCall("setCop0Register", "(II)V")
         }
     }
@@ -350,6 +355,7 @@ class BytecodeEmitter {
                 Condition.INT_SMALLER_THAN_ZERO -> ifge(elseLabel)
                 Condition.INT_SMALLER_OR_EQUAL_ZERO -> ifgt(elseLabel)
                 Condition.INT_ZERO -> ifne(elseLabel)
+                Condition.INT_NOT_ZERO -> ifeq(elseLabel)
                 Condition.INT_GREATER_THAN_ZERO -> ifle(elseLabel)
             }
 

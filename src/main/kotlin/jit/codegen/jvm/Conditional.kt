@@ -49,6 +49,12 @@ enum class Condition {
     INT_ZERO,
 
     /**
+     * Tests an integer operand for equality to 0 and runs a
+     * block only when that is not the case.
+     */
+    INT_NOT_ZERO,
+
+    /**
      * Tests an integer operand for greater than zero and
      * runs a block only when that is the case.
      */

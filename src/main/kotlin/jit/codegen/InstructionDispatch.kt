@@ -32,7 +32,7 @@ private fun dispatchFunction(
 
 private val instructionTable = arrayOf(
     ::dispatchFunction,
-    ::unimplemented,
+    ::b,
     ::j,
     ::jal,
     ::beq,
