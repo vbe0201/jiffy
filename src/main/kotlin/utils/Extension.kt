@@ -6,9 +6,8 @@ package io.github.vbe0201.jiffy.utils
  * This preserves the sign bit of the original value.
  */
 fun UByte.signExtend32(): UInt {
-    // Casting from Byte to Int preserves the sign.
-    // Then bit casts the resulting value back to UInt.
-    return this.toByte().toInt().toUInt()
+    // Casting from Byte to UInt preserves the sign.
+    return this.toByte().toUInt()
 }
 
 /**
@@ -27,9 +26,8 @@ fun UByte.zeroExtend32(): UInt {
  * This preserves the sign bit of the original value.
  */
 fun UShort.signExtend32(): UInt {
-    // Casting from Short to Int preserves the sign.
-    // Then bit casts the resulting value back to UInt.
-    return this.toShort().toInt().toUInt()
+    // Casting from Short to UInt preserves the sign.
+    return this.toShort().toUInt()
 }
 
 /**
