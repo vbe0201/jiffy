@@ -45,6 +45,7 @@ class ExecutionContext(
      * The special-purpose register which holds the high 32 bits of
      * multiplication result; remainder of division.
      */
+    @get:JvmName("getHi")
     @set:JvmName("setHi")
     var hi = 0U
 
@@ -52,6 +53,7 @@ class ExecutionContext(
      * The special-purpose register which holds the low 32 bits of
      * multiplication result; quotient of division.
      */
+    @get:JvmName("getLo")
     @set:JvmName("setLo")
     var lo = 0U
 

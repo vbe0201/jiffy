@@ -298,6 +298,19 @@ class BytecodeEmitter {
     }
 
     /**
+     * Gets the integer value of the special-purpose LO register
+     * and returns its [Operand] descriptor.
+     */
+    fun getLow(): Operand {
+        this.raw.run {
+            visitVarInsn(ALOAD, 1)
+            contextCall("getLo", "()I")
+        }
+
+        return Operand(JvmType.INT)
+    }
+
+    /**
      * Sets the special-purpose LO register to a new value.
      *
      * The given operation is responsible for placing the new value
@@ -309,6 +322,19 @@ class BytecodeEmitter {
             op()
             contextCall("setLo", "(I)V")
         }
+    }
+
+    /**
+     * Gets the integer value of the special-purpose HI register
+     * and returns its [Operand] descriptor.
+     */
+    fun getHigh(): Operand {
+        this.raw.run {
+            visitVarInsn(ALOAD, 1)
+            contextCall("getHi", "()I")
+        }
+
+        return Operand(JvmType.INT)
     }
 
     /**

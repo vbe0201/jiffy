@@ -539,3 +539,47 @@ fun divu(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
 
     return Status.CONTINUE_BLOCK
 }
+
+/**
+ * Generates Move From LO (MFLO) instruction to the code buffer.
+ */
+fun mflo(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
+    emitter.setGpr(meta.insn.rd()) {
+        getLow()
+    }
+
+    return Status.CONTINUE_BLOCK
+}
+
+/**
+ * Generates the Move From HI (MFHI) instruction to the code buffer.
+ */
+fun mfhi(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
+    emitter.setGpr(meta.insn.rd()) {
+        getHigh()
+    }
+
+    return Status.CONTINUE_BLOCK
+}
+
+/**
+ * Generates the Move To LO (MTLO) instruction to the code buffer.
+ */
+fun mtlo(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
+    emitter.setLow {
+        getGpr(meta.insn.rs())
+    }
+
+    return Status.CONTINUE_BLOCK
+}
+
+/**
+ * Generates the Move To HI (MTHI) instruction to the code buffer.
+ */
+fun mthi(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
+    emitter.setHigh {
+        getGpr(meta.insn.rs())
+    }
+
+    return Status.CONTINUE_BLOCK
+}
