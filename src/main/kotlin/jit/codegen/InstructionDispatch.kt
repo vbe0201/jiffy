@@ -49,7 +49,7 @@ private val instructionTable = arrayOf(
     ::xori,
     ::lui,
 
-    ::unimplemented,
+    ::cop0,
     ::unimplemented,
     ::unimplemented,
     ::unimplemented,
