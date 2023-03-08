@@ -28,7 +28,7 @@ private val exceptionKindEnum = Type.getInternalName(ExceptionKind::class.java)
 
 // The local variable slot for a value from a delayed memory load.
 private const val DELAYED_LOAD_SLOT = 2
-private const val WRITE_BACKUP_SLOT = 3
+private const val TEMP_WRITE_BACKUP_SLOT = 3
 
 private fun makeWriterWithPrologue(): ClassWriter {
     val writer = ClassWriter(WRITER_FLAGS)
@@ -292,7 +292,7 @@ class BytecodeEmitter {
     ) {
         this.raw.run {
             visitVarInsn(ALOAD, 1)
-            val value = op().storeLocal(WRITE_BACKUP_SLOT)
+            val value = op().storeLocal(TEMP_WRITE_BACKUP_SLOT)
 
             // Check if the write address is correctly aligned.
             // Since Longs are unsupported and addresses are expected
@@ -307,7 +307,7 @@ class BytecodeEmitter {
                 }
             }
 
-            value.loadLocal(WRITE_BACKUP_SLOT)
+            value.loadLocal(TEMP_WRITE_BACKUP_SLOT)
             when (value.type) {
                 JvmType.BYTE -> contextCall("write8", "(IB)V")
                 JvmType.SHORT -> contextCall("write16", "(IS)V")

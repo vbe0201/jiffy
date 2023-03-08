@@ -10,7 +10,7 @@ import io.github.vbe0201.jiffy.utils.*
 
 // Local variable slots in the generated function; temporarily
 // occupied for implementation details of individual instructions.
-private const val TEMP_BRANCH_SLOT = 6
+private const val TEMP_BRANCH_SLOT = 4
 
 private inline fun computeBranchTarget(pc: UInt, target: UShort): Int {
     val offset = target.signExtend32() shl 2

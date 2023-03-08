@@ -11,8 +11,8 @@ import io.github.vbe0201.jiffy.utils.*
 
 // Local variable slots in the generated function; temporarily
 // occupied for implementation details of individual instructions.
-private const val TEMP_MUL_SLOT = 4
-private const val CHECKED_RES_SLOT = 5
+private const val TEMP_MUL_SLOT = 3
+private const val CHECKED_RES_SLOT = 4
 
 private inline fun checkedAdd(
     meta: InstructionMeta,
@@ -432,7 +432,7 @@ fun mult(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
         // Perform signed multiplication of input registers.
         val result = getGpr(meta.insn.rs()).signExtend(JvmType.LONG)
             .mult { getGpr(meta.insn.rt()).signExtend(JvmType.LONG) }
-            .storeLocal(TEMP_MUL_SLOT)
+            //.storeLocal(TEMP_MUL_SLOT)
 
         // Set the HI register to the high 32 bits of the result.
         setHigh {

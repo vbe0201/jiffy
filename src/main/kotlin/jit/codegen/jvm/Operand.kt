@@ -130,17 +130,18 @@ value class Operand(val type: JvmType) {
     fun zeroExtend(new: JvmType): Operand {
         val mask = this.type.mask.toInt()
 
-        // If we want a Long, we have to convert to Int first.
-        // Otherwise, AND below will promote any type to Int.
-        if (new === JvmType.LONG) {
+        // If we want a Long, we have to convert from Int first.
+        // Otherwise, AND will promote any type to Int.
+        return if (new === JvmType.LONG) {
             this@BytecodeEmitter.raw.visitInsn(Opcodes.I2L)
+
+            Operand(new).and {
+                place(mask)
+                raw.visitInsn(Opcodes.I2L)
+            }
+        } else {
+            Operand(new).and { place(mask) }
         }
-
-        // Bitwise ANDing with the mask of the previous value
-        // discards added bits during sign extension.
-        this.and { place(mask) }
-
-        return Operand(new)
     }
 
     /**
