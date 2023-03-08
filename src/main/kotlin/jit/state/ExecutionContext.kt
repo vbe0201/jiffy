@@ -1,8 +1,6 @@
 package io.github.vbe0201.jiffy.jit.state
 
-import io.github.vbe0201.jiffy.cpu.BIOS_START
-import io.github.vbe0201.jiffy.cpu.Bus
-import io.github.vbe0201.jiffy.cpu.Cop0
+import io.github.vbe0201.jiffy.cpu.*
 
 /**
  * The execution context of the JIT.
@@ -79,9 +77,10 @@ class ExecutionContext(
      */
     @JvmName("read8")
     fun read8(addr: UInt): UByte {
-        if (this.cop0.status.cacheIsolated()) {
+        if (this.cop0.status.de()) {
             return 0U
         }
+
         return this.bus.read8(addr)
     }
 
@@ -91,10 +90,10 @@ class ExecutionContext(
      */
     @JvmName("read16")
     fun read16(addr: UInt): UShort {
-        if (this.cop0.status.cacheIsolated()) {
+        if (this.cop0.status.de()) {
             return 0U
         }
-        // TODO: Alignment check.
+
         return this.bus.read16(addr)
     }
 
@@ -104,10 +103,10 @@ class ExecutionContext(
      */
     @JvmName("read32")
     fun read32(addr: UInt): UInt {
-        if (this.cop0.status.cacheIsolated()) {
+        if (this.cop0.status.de()) {
             return 0U
         }
-        // TODO: Alignment check.
+
         return this.bus.read32(addr)
     }
 
@@ -117,9 +116,10 @@ class ExecutionContext(
      */
     @JvmName("write8")
     fun write8(addr: UInt, value: UByte) {
-        if (this.cop0.status.cacheIsolated()) {
+        if (this.cop0.status.de()) {
             return
         }
+
         this.bus.write8(addr, value)
     }
 
@@ -129,10 +129,10 @@ class ExecutionContext(
      */
     @JvmName("write16")
     fun write16(addr: UInt, value: UShort) {
-        if (this.cop0.status.cacheIsolated()) {
+        if (this.cop0.status.de()) {
             return
         }
-        // TODO: Alignment check.
+
         this.bus.write16(addr, value)
     }
 
@@ -142,11 +142,34 @@ class ExecutionContext(
      */
     @JvmName("write32")
     fun write32(addr: UInt, value: UInt) {
-        if (this.cop0.status.cacheIsolated()) {
+        if (this.cop0.status.de()) {
             return
         }
-        // TODO: Alignment check.
+
         this.bus.write32(addr, value)
+    }
+
+    /**
+     * Raises a CPU exception of a given [ExceptionKind] from a
+     * faulting program counter value.
+     */
+    @JvmName("raiseException")
+    fun raiseException(pc: UInt, delayed: Boolean, kind: ExceptionKind) {
+        // Configure exceptional state in COP0.
+        this.cop0.raiseException(pc, delayed, kind)
+
+        // Determine the exception handler address and jump to it.
+        this.pc = when (this.cop0.status.bev()) {
+            true -> 0xBFC0_0180U
+            false -> 0x8000_0080U
+        }
+    }
+
+    /**
+     * Restores internal state when leaving exception mode.
+     */
+    fun restoreAfterException() {
+        this.cop0.restoreAfterException()
     }
 
     /**

@@ -6,7 +6,7 @@ import io.github.vbe0201.jiffy.jit.codegen.jvm.BytecodeEmitter
 import io.github.vbe0201.jiffy.jit.codegen.jvm.JvmType
 import io.github.vbe0201.jiffy.jit.codegen.jvm.Operand
 import io.github.vbe0201.jiffy.jit.decoder.Instruction
-import io.github.vbe0201.jiffy.utils.signExtend32
+import io.github.vbe0201.jiffy.utils.*
 
 private inline fun computeLoadAddress(
     insn: Instruction,
@@ -20,21 +20,21 @@ private inline fun computeLoadAddress(
 
 private inline fun loadMemory(
     ty: JvmType,
-    insn: Instruction,
+    meta: InstructionMeta,
     emitter: BytecodeEmitter
 ): Operand {
-    return emitter.loadBus(ty) {
-        computeLoadAddress(insn, this)
+    return emitter.loadBus(meta.exceptionPc(), meta.branchDelaySlot, ty) {
+        computeLoadAddress(meta.insn, this)
     }
 }
 
 private inline fun storeMemory(
-    insn: Instruction,
+    meta: InstructionMeta,
     emitter: BytecodeEmitter,
     crossinline op: BytecodeEmitter.() -> Operand,
 ) {
-    return emitter.writeBus {
-        computeLoadAddress(insn, this)
+    return emitter.writeBus(meta.exceptionPc(), meta.branchDelaySlot) {
+        computeLoadAddress(meta.insn, this)
         op()
     }
 }
@@ -46,7 +46,7 @@ fun lb(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     emitter.run {
         configureDelayedLoad(
             meta.insn.rt(),
-            loadMemory(JvmType.BYTE, meta.insn, emitter).signExtend(JvmType.INT)
+            loadMemory(JvmType.BYTE, meta, emitter).signExtend(JvmType.INT)
         )
     }
 
@@ -61,7 +61,7 @@ fun lbu(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     emitter.run {
         configureDelayedLoad(
             meta.insn.rt(),
-            loadMemory(JvmType.BYTE, meta.insn, emitter).zeroExtend(JvmType.INT)
+            loadMemory(JvmType.BYTE, meta, emitter).zeroExtend(JvmType.INT)
         )
     }
 
@@ -75,11 +75,7 @@ fun lh(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     emitter.run {
         configureDelayedLoad(
             meta.insn.rt(),
-            loadMemory(
-                JvmType.SHORT,
-                meta.insn,
-                emitter
-            ).signExtend(JvmType.INT)
+            loadMemory(JvmType.SHORT, meta, emitter).signExtend(JvmType.INT)
         )
     }
 
@@ -94,11 +90,7 @@ fun lhu(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     emitter.run {
         configureDelayedLoad(
             meta.insn.rt(),
-            loadMemory(
-                JvmType.SHORT,
-                meta.insn,
-                emitter
-            ).zeroExtend(JvmType.INT)
+            loadMemory(JvmType.SHORT, meta, emitter).zeroExtend(JvmType.INT)
         )
     }
 
@@ -111,7 +103,7 @@ fun lhu(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
 fun lw(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     emitter.configureDelayedLoad(
         meta.insn.rt(),
-        loadMemory(JvmType.INT, meta.insn, emitter)
+        loadMemory(JvmType.INT, meta, emitter)
     )
 
     return Status.FILL_LOAD_DELAY_SLOT
@@ -121,7 +113,7 @@ fun lw(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
  * Generates the Store Byte (SB) instruction to the code buffer.
  */
 fun sb(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
-    storeMemory(meta.insn, emitter) {
+    storeMemory(meta, emitter) {
         getGpr(meta.insn.rt()).truncate(JvmType.BYTE)
     }
 
@@ -132,7 +124,7 @@ fun sb(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
  * Generates the Store Halfword (SH) instruction to the code buffer.
  */
 fun sh(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
-    storeMemory(meta.insn, emitter) {
+    storeMemory(meta, emitter) {
         getGpr(meta.insn.rt()).truncate(JvmType.SHORT)
     }
 
@@ -143,7 +135,7 @@ fun sh(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
  * Generates the Store Word (SW) instruction to the code buffer.
  */
 fun sw(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
-    storeMemory(meta.insn, emitter) {
+    storeMemory(meta, emitter) {
         getGpr(meta.insn.rt())
     }
 

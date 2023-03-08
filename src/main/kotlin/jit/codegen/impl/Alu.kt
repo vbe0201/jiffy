@@ -7,13 +7,12 @@ import io.github.vbe0201.jiffy.jit.codegen.jvm.Condition
 import io.github.vbe0201.jiffy.jit.codegen.jvm.JvmType
 import io.github.vbe0201.jiffy.jit.codegen.jvm.Operand
 import io.github.vbe0201.jiffy.jit.decoder.Register
-import io.github.vbe0201.jiffy.utils.signExtend32
-import io.github.vbe0201.jiffy.utils.zeroExtend32
+import io.github.vbe0201.jiffy.utils.*
 
 // Local variable slots in the generated function; temporarily
 // occupied for implementation details of individual instructions.
-private const val TEMP_MUL_SLOT: Int = 3
-private const val CHECKED_RES_SLOT: Int = 4
+private const val TEMP_MUL_SLOT = 4
+private const val CHECKED_RES_SLOT = 5
 
 private inline fun checkedAdd(
     meta: InstructionMeta,
@@ -35,8 +34,8 @@ private inline fun checkedAdd(
 
         conditional(Condition.INT_SMALLER_THAN_ZERO) {
             then = {
-                // TODO: Raise an exception for overflow.
-                unimplemented()
+                // Generate an overflow CPU exception.
+                exception(meta.exceptionPc(), meta.branchDelaySlot, "OVERFLOW")
             }
 
             orElse = {
@@ -69,8 +68,8 @@ private inline fun checkedSub(
 
         conditional(Condition.INT_SMALLER_THAN_ZERO) {
             then = {
-                // TODO: Raise an exception for overflow.
-                unimplemented()
+                // Generate an overflow CPU exception.
+                exception(meta.exceptionPc(), meta.branchDelaySlot, "OVERFLOW")
             }
 
             orElse = {

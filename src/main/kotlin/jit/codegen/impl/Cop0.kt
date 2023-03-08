@@ -8,6 +8,7 @@ internal fun cop0(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     return when (val op = meta.insn.copOpcode()) {
         0b00000U -> mfc0(meta, emitter)
         0b00100U -> mtc0(meta, emitter)
+        0b10000U -> rfe(meta, emitter)
 
         // TODO: Figure out a better way to handle invalid instructions.
         else -> {
@@ -39,5 +40,19 @@ fun mtc0(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
         getGpr(meta.insn.rt())
     }
 
+    return Status.CONTINUE_BLOCK
+}
+
+/**
+ * Generates the Return From Exception (RFE) instruction to
+ * the code buffer.
+ */
+fun rfe(
+    @Suppress("UNUSED_PARAMETER") meta: InstructionMeta,
+    emitter: BytecodeEmitter
+): Status {
+    // TODO: Check for unsupported virtual memory instructions?
+
+    emitter.restoreAfterException()
     return Status.CONTINUE_BLOCK
 }

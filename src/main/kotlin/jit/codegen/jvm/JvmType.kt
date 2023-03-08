@@ -7,26 +7,26 @@ import org.objectweb.asm.Type
  * Represents a data type on the JVM with associated opcode values
  * for common arithmetic instructions.
  */
-enum class JvmType(val mask: UInt, private val ty: Type) {
+enum class JvmType(val mask: UInt, val align: Int, private val ty: Type) {
     /**
      * The [Byte] (or [UByte]) type.
      */
-    BYTE(0xFFU, Type.BYTE_TYPE),
+    BYTE(0xFFU, Byte.SIZE_BYTES, Type.BYTE_TYPE),
 
     /**
      * The [Short] (or [UShort]) type.
      */
-    SHORT(0xFFFFU, Type.SHORT_TYPE),
+    SHORT(0xFFFFU, Short.SIZE_BYTES, Type.SHORT_TYPE),
 
     /**
      * The [Int] (or [UInt]) type.
      */
-    INT(0xFFFF_FFFFU, Type.INT_TYPE),
+    INT(0xFFFF_FFFFU, Int.SIZE_BYTES, Type.INT_TYPE),
 
     /**
      * The [Long] (or [ULong]) type.
      */
-    LONG(0U, Type.LONG_TYPE);
+    LONG(0U, Long.SIZE_BYTES, Type.LONG_TYPE);
 
     // Common arithmetic opcodes for every value type.
     val add: Int = this.ty.getOpcode(Opcodes.IADD)

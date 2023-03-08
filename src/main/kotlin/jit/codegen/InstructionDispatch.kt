@@ -118,7 +118,7 @@ private val functionTable = arrayOf(
     ::jalr,
     ::unimplemented,
     ::unimplemented,
-    ::unimplemented,
+    ::syscall,
     ::unimplemented,
     ::unimplemented,
     ::unimplemented,

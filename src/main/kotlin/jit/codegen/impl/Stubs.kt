@@ -10,7 +10,7 @@ import io.github.vbe0201.jiffy.jit.codegen.jvm.BytecodeEmitter
  * This should only be used during prototyping.
  */
 fun unimplemented(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
-    println("[0x${meta.pc.toString(16)}] ${meta.insn.kind()} unimplemented!")
+    println("[0x${meta.currentPc.toString(16)}] ${meta.insn.kind()} unimplemented!")
 
     emitter.unimplemented()
     return Status.TERMINATE_BLOCK

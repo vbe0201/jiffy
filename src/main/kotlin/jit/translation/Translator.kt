@@ -1,9 +1,12 @@
 package io.github.vbe0201.jiffy.jit.translation
 
+import io.github.vbe0201.jiffy.cpu.ExceptionKind
 import io.github.vbe0201.jiffy.jit.codegen.BlockBuilder
 import io.github.vbe0201.jiffy.jit.codegen.jvm.BytecodeEmitter
+import io.github.vbe0201.jiffy.jit.decoder.INSTRUCTION_SIZE
 import io.github.vbe0201.jiffy.jit.state.ExecutionContext
 import io.github.vbe0201.jiffy.jit.state.State
+import io.github.vbe0201.jiffy.utils.isAligned
 
 /**
  * The runtime code translator.
@@ -29,6 +32,17 @@ class Translator {
         context.state = State.RUNNING
 
         while (context.state == State.RUNNING) {
+            // Make sure the MIPS program counter is aligned to full
+            // instruction boundaries or generate an exception.
+            if (!context.pc.isAligned(INSTRUCTION_SIZE)) {
+                context.raiseException(
+                    context.pc,
+                    false,
+                    ExceptionKind.UNALIGNED_LOAD
+                )
+            }
+
+            // Find or translate the next code block and execute it.
             val block = findOrCompileBlock(context, context.pc)
             block.code.execute(context)
         }

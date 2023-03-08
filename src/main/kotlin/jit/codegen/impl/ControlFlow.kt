@@ -6,15 +6,15 @@ import io.github.vbe0201.jiffy.jit.codegen.jvm.BytecodeEmitter
 import io.github.vbe0201.jiffy.jit.codegen.jvm.Condition
 import io.github.vbe0201.jiffy.jit.decoder.INSTRUCTION_SIZE
 import io.github.vbe0201.jiffy.jit.decoder.RA
-import io.github.vbe0201.jiffy.utils.signExtend32
+import io.github.vbe0201.jiffy.utils.*
 
 // Local variable slots in the generated function; temporarily
 // occupied for implementation details of individual instructions.
-private const val TEMP_BRANCH_SLOT: Int = 5
+private const val TEMP_BRANCH_SLOT = 6
 
 private inline fun computeBranchTarget(pc: UInt, target: UShort): Int {
     val offset = target.signExtend32() shl 2
-    return (pc + INSTRUCTION_SIZE + offset).toInt()
+    return (pc + offset).toInt()
 }
 
 private inline fun branchConditional(
@@ -32,7 +32,7 @@ private inline fun branchConditional(
 
         // Otherwise, adjust the PC past the branch and its delay slot.
         orElse = {
-            jump { place((meta.pc + INSTRUCTION_SIZE * 2U).toInt()) }
+            jump { place((meta.pc + INSTRUCTION_SIZE).toInt()) }
         }
     }
 }
@@ -71,7 +71,7 @@ fun b(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
 
         // Store the return address in `$ra`, if requested.
         if (link) {
-            setGpr(RA) { place((meta.pc + INSTRUCTION_SIZE * 2U).toInt()) }
+            setGpr(RA) { place((meta.pc + INSTRUCTION_SIZE).toInt()) }
         }
 
         // Branch when requested.
@@ -88,7 +88,7 @@ fun b(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
 fun jal(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     // Store the return address in the `$ra` register.
     emitter.setGpr(RA) {
-        place((meta.pc + INSTRUCTION_SIZE * 2U).toInt())
+        place((meta.pc + INSTRUCTION_SIZE).toInt())
     }
 
     // Jump to the destination.
@@ -108,7 +108,7 @@ fun jalr(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
 
         // Store the return address in the selected register.
         setGpr(meta.insn.rd()) {
-            place((meta.pc + INSTRUCTION_SIZE * 2U).toInt())
+            place((meta.pc + INSTRUCTION_SIZE).toInt())
         }
     }
 

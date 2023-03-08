@@ -31,6 +31,7 @@ class BlockBuilder(
         val meta = InstructionMeta(
             context.bus.readInstruction(addr),
             addr,
+            addr + INSTRUCTION_SIZE,
             previousStatus === Status.FILL_BRANCH_DELAY_SLOT
         )
 

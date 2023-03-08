@@ -1,10 +1,12 @@
 package io.github.vbe0201.jiffy.jit.codegen.jvm
 
+import io.github.vbe0201.jiffy.cpu.ExceptionKind
 import io.github.vbe0201.jiffy.jit.decoder.Register
 import io.github.vbe0201.jiffy.jit.decoder.ZERO
 import io.github.vbe0201.jiffy.jit.state.ExecutionContext
 import io.github.vbe0201.jiffy.jit.translation.Compiled
 import io.github.vbe0201.jiffy.jit.translation.Compiler
+import io.github.vbe0201.jiffy.utils.toInt
 import org.objectweb.asm.commons.InstructionAdapter
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Label
@@ -22,9 +24,11 @@ private const val CLASS_VERSION = V19
 private val compiledInterface = Type.getInternalName(Compiled::class.java)
 private val compilerClass = Type.getInternalName(Compiler::class.java)
 private val contextClass = Type.getInternalName(ExecutionContext::class.java)
+private val exceptionKindEnum = Type.getInternalName(ExceptionKind::class.java)
 
 // The local variable slot for a value from a delayed memory load.
 private const val DELAYED_LOAD_SLOT = 2
+private const val WRITE_BACKUP_SLOT = 3
 
 private fun makeWriterWithPrologue(): ClassWriter {
     val writer = ClassWriter(WRITER_FLAGS)
@@ -236,12 +240,27 @@ class BytecodeEmitter {
      * See [BytecodeEmitter.configureDelayedLoad].
      */
     fun loadBus(
+        pc: UInt,
+        delayed: Boolean,
         res: JvmType,
         op: BytecodeEmitter.() -> Unit
     ): Operand {
         this.raw.run {
             visitVarInsn(ALOAD, 1)
             op()
+
+            // Check if the read address is correctly aligned.
+            // Since Longs are unsupported and addresses are expected
+            // to be Ints, it is fine to hardcode the instructions.
+            visitInsn(DUP)
+            visitInsn(ICONST_0 + res.align - 1)
+            visitInsn(IAND)
+            conditional(Condition.INT_NOT_ZERO) {
+                then = {
+                    pop()
+                    exception(pc, delayed, "UNALIGNED_LOAD")
+                }
+            }
 
             when (res) {
                 JvmType.BYTE -> contextCall("read8", "(I)B")
@@ -266,11 +285,29 @@ class BytecodeEmitter {
      * The [Operand] for the value to be written should be returned.
      * The user is responsible for casting it to the desired type.
      */
-    fun writeBus(op: BytecodeEmitter.() -> Operand) {
+    fun writeBus(
+        pc: UInt,
+        delayed: Boolean,
+        op: BytecodeEmitter.() -> Operand
+    ) {
         this.raw.run {
             visitVarInsn(ALOAD, 1)
+            val value = op().storeLocal(WRITE_BACKUP_SLOT)
 
-            val value = op()
+            // Check if the write address is correctly aligned.
+            // Since Longs are unsupported and addresses are expected
+            // to be Ints, it is fine to hardcode the instructions.
+            visitInsn(DUP)
+            visitInsn(ICONST_0 + value.type.align - 1)
+            visitInsn(IAND)
+            conditional(Condition.INT_NOT_ZERO) {
+                then = {
+                    pop()
+                    exception(pc, delayed, "UNALIGNED_STORE")
+                }
+            }
+
+            value.loadLocal(WRITE_BACKUP_SLOT)
             when (value.type) {
                 JvmType.BYTE -> contextCall("write8", "(IB)V")
                 JvmType.SHORT -> contextCall("write16", "(IS)V")
@@ -411,6 +448,35 @@ class BytecodeEmitter {
         this.raw.run {
             visitVarInsn(ALOAD, 1)
             contextCall("unimplemented", "()V")
+        }
+    }
+
+    /**
+     * Emits a call to [ExecutionContext.raiseException] and
+     * prematurely returns from the current block.
+     */
+    fun exception(pc: UInt, delayed: Boolean, kind: String) {
+        this.raw.run {
+            visitVarInsn(ALOAD, 1)
+            iconst(pc.toInt())
+            visitInsn(ICONST_0 + delayed.toInt())
+            getstatic(exceptionKindEnum, kind, "L$exceptionKindEnum;")
+            contextCall("raiseException", "(IZL$exceptionKindEnum;)V")
+
+            // After an exception was raised, return from the block.
+            // We want to run exception handler code immediately.
+            visitInsn(RETURN)
+        }
+    }
+
+    /**
+     * Emits a call to [ExecutionContext.restoreAfterException]
+     * to leave exceptional state.
+     */
+    fun restoreAfterException() {
+        this.raw.run {
+            visitVarInsn(ALOAD, 1)
+            contextCall("restoreAfterException", "()V")
         }
     }
 }
