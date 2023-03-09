@@ -13,8 +13,12 @@ import java.nio.ByteOrder
  * The bus interface is responsible for handling reads and writes
  * to memory or I/O devices.
  */
-class Bus(private val bios: ByteBuffer) {
-    private val ram = makeArrayBuffer(MemoryMap.RAM.size, 0xCA.toByte())
+class Bus(
+    /** The read-only BIOS image buffer. */
+    val bios: ByteBuffer
+) {
+    /** The Random Access Memory buffer. */
+    val ram = makeArrayBuffer(MemoryMap.RAM.size, 0xCA.toByte())
 
     // Configure all memory accesses to be in little-endian byte order
     // and make sure that we get a BIOS image of the expected size.
@@ -25,79 +29,67 @@ class Bus(private val bios: ByteBuffer) {
         ram.order(ByteOrder.LITTLE_ENDIAN)
     }
 
-    /** Reads a value from the given address through the bus. */
-    fun read8(addr: UInt): UByte {
+    @PublishedApi
+    internal inline fun <reified T> read(
+        addr: UInt,
+        op: ByteBuffer.(Int) -> T,
+        default: T,
+    ): T {
         val masked = maskSegment(addr)
 
         return if (MemoryMap.RAM.contains(masked)) {
-            this.ram.uget(MemoryMap.RAM.makeOffset(masked))
+            this.ram.op(MemoryMap.RAM.makeOffset(masked))
         } else if (MemoryMap.BIOS.contains(masked)) {
-            this.bios.uget(MemoryMap.BIOS.makeOffset(masked))
+            this.bios.op(MemoryMap.BIOS.makeOffset(masked))
         } else {
-            println("read(0x${masked.toString(16)})")
-            return 0U
+            println("read(0x${addr.toString(16)})")
+            return default
+        }
+    }
+
+    @PublishedApi
+    internal inline fun <reified T> write(
+        addr: UInt,
+        op: ByteBuffer.(Int, T) -> Unit,
+        value: T,
+    ) {
+        val masked = maskSegment(addr)
+
+        if (MemoryMap.RAM.contains(masked)) {
+            this.ram.op(MemoryMap.RAM.makeOffset(masked), value)
+        } else {
+            println("read(0x${addr.toString(16)})")
         }
     }
 
     /** Reads a value from the given address through the bus. */
-    fun read16(addr: UInt): UShort {
-        val masked = maskSegment(addr)
+    inline fun read8(addr: UInt): UByte {
+        return this.read(addr, ByteBuffer::uget, 0U)
+    }
 
-        return if (MemoryMap.RAM.contains(masked)) {
-            this.ram.getUShort(MemoryMap.RAM.makeOffset(masked))
-        } else if (MemoryMap.BIOS.contains(masked)) {
-            this.bios.getUShort(MemoryMap.BIOS.makeOffset(masked))
-        } else {
-            println("read(0x${masked.toString(16)})")
-            return 0U
-        }
+    /** Reads a value from the given address through the bus. */
+    inline fun read16(addr: UInt): UShort {
+        return this.read(addr, ByteBuffer::getUShort, 0U)
     }
 
     /** Reads a value from the given address through the bus. */
     fun read32(addr: UInt): UInt {
-        val masked = maskSegment(addr)
-
-        return if (MemoryMap.RAM.contains(masked)) {
-            this.ram.getUInt(MemoryMap.RAM.makeOffset(masked))
-        } else if (MemoryMap.BIOS.contains(masked)) {
-            this.bios.getUInt(MemoryMap.BIOS.makeOffset(masked))
-        } else {
-            println("read(0x${masked.toString(16)})")
-            return 0U
-        }
+        return this.read(addr, ByteBuffer::getUInt, 0U)
     }
 
     /** Writes a [value] to the given address through the bus. */
     fun write8(addr: UInt, value: UByte) {
-        val masked = maskSegment(addr)
-
-        if (MemoryMap.RAM.contains(masked)) {
-            this.ram.uput(MemoryMap.RAM.makeOffset(masked), value)
-        } else {
-            println("write(0x${addr.toString(16)}, ..)")
-        }
+        this.write(addr, ByteBuffer::uput, value)
     }
 
     /** Writes a [value] to the given address through the bus. */
     fun write16(addr: UInt, value: UShort) {
-        val masked = maskSegment(addr)
-
-        if (MemoryMap.RAM.contains(masked)) {
-            this.ram.putUShort(MemoryMap.RAM.makeOffset(masked), value)
-        } else {
-            println("write(0x${addr.toString(16)}, ..)")
-        }
+        this.write(addr, ByteBuffer::putUShort, value)
     }
 
     /** Writes a [value] to the given address through the bus. */
     fun write32(addr: UInt, value: UInt) {
-        val masked = maskSegment(addr)
-
-        if (MemoryMap.RAM.contains(masked)) {
-            this.ram.putUInt(MemoryMap.RAM.makeOffset(masked), value)
-        } else {
-            println("write(0x${addr.toString(16)}, ..)")
-        }
+        this.write(addr, ByteBuffer::putUInt, value)
     }
 
     /** Reads an [Instruction] from the given memory address. */
