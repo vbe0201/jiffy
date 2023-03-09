@@ -1,5 +1,6 @@
 package io.github.vbe0201.jiffy.jit.codegen
 
+import io.github.vbe0201.jiffy.cpu.ExceptionKind
 import io.github.vbe0201.jiffy.jit.codegen.impl.*
 import io.github.vbe0201.jiffy.jit.codegen.jvm.BytecodeEmitter
 import kotlin.system.exitProcess
@@ -10,8 +11,16 @@ import kotlin.system.exitProcess
  * The resulting bytecode will be written to [BytecodeEmitter].
  */
 fun dispatch(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
-    // TODO: Figure out a nicer way to handle invalid instructions.
-    val kind = meta.insn.kind() ?: exitProcess(1)
+    // Identify the next instruction or generate an exception.
+    val kind = meta.insn.kind()
+    if (kind == null) {
+        emitter.exception(
+            meta.exceptionPc(),
+            meta.branchDelaySlot,
+            ExceptionKind.ILLEGAL_INSTRUCTION
+        )
+        return Status.TERMINATE_BLOCK
+    }
 
     // Find the handler for the instruction and invoke it.
     val handler = instructionTable[kind.opcode.toInt()]
@@ -20,7 +29,7 @@ fun dispatch(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
 
 private fun dispatchFunction(
     meta: InstructionMeta,
-    emitter: BytecodeEmitter
+    emitter: BytecodeEmitter,
 ): Status {
     // TODO: Figure out a mroe elegant way to handle invalid instructions.
     val func = meta.insn.function() ?: exitProcess(1)
@@ -50,9 +59,9 @@ private val instructionTable = arrayOf(
     ::lui,
 
     ::cop0,
+    ::cop,
     ::unimplemented,
-    ::unimplemented,
-    ::unimplemented,
+    ::cop,
     ::unimplemented,
     ::unimplemented,
     ::unimplemented,
