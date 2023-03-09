@@ -16,13 +16,13 @@ value class StatusRegister(val raw: UInt) {
         // pair of zeroes to disable interrupts and put the CPU in
         // Kernel Mode. One entry gets discarded since the kernel is
         // responsible for handling more than two levels of recursion.
-        val mode = ((this.raw and 0x3FU) shl 2) and 0x3FU
-        return StatusRegister((this.raw and 0x3FU.inv()) or mode)
+        val mode = this.raw.shl(2).and(0x3FU)
+        return StatusRegister(this.raw.and(0x3FU.inv()).or(mode))
     }
 
     /** Returns a new status register value upon leaving from exception. */
     inline fun leaveException(): StatusRegister {
-        val mode = (this.raw and 0x3FU) shr 2
-        return StatusRegister((this.raw and 0x3FU.inv()) or mode)
+        val mode = this.raw.and(0x3FU).shr(2)
+        return StatusRegister(this.raw.and(0x3FU.inv()).or(mode))
     }
 }

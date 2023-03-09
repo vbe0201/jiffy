@@ -1,6 +1,5 @@
 package io.github.vbe0201.jiffy.jit.codegen
 
-import io.github.vbe0201.jiffy.cpu.ExceptionKind
 import io.github.vbe0201.jiffy.jit.codegen.impl.*
 import io.github.vbe0201.jiffy.jit.codegen.jvm.BytecodeEmitter
 
@@ -11,15 +10,7 @@ import io.github.vbe0201.jiffy.jit.codegen.jvm.BytecodeEmitter
  */
 fun dispatch(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     // Identify the next instruction or generate an exception.
-    val kind = meta.insn.kind()
-    if (kind == null) {
-        emitter.exception(
-            meta.exceptionPc(),
-            meta.branchDelaySlot,
-            ExceptionKind.ILLEGAL_INSTRUCTION
-        )
-        return Status.TERMINATE_BLOCK
-    }
+    val kind = meta.insn.kind() ?: return invalid(meta, emitter)
 
     // Find the handler for the instruction and invoke it.
     val handler = instructionTable[kind.opcode.toInt()]
@@ -31,15 +22,7 @@ private fun dispatchFunction(
     emitter: BytecodeEmitter,
 ): Status {
     // Identify the next instruction or generate an exception.
-    val func = meta.insn.function()
-    if (func == null) {
-        emitter.exception(
-            meta.exceptionPc(),
-            meta.branchDelaySlot,
-            ExceptionKind.ILLEGAL_INSTRUCTION
-        )
-        return Status.TERMINATE_BLOCK
-    }
+    val func = meta.insn.function() ?: return invalid(meta, emitter)
 
     // Delegate to the corresponding entry in the functions table.
     val handler = functionTable[func.opcode.toInt()]

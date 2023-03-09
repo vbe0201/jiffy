@@ -8,25 +8,17 @@ import org.objectweb.asm.Type
  * for common arithmetic instructions.
  */
 enum class JvmType(val mask: UInt, val align: Int, private val ty: Type) {
-    /**
-     * The [Byte] (or [UByte]) type.
-     */
+    /** The [Byte] (or [UByte]) type. */
     BYTE(0xFFU, Byte.SIZE_BYTES, Type.BYTE_TYPE),
 
-    /**
-     * The [Short] (or [UShort]) type.
-     */
+    /** The [Short] (or [UShort]) type. */
     SHORT(0xFFFFU, Short.SIZE_BYTES, Type.SHORT_TYPE),
 
-    /**
-     * The [Int] (or [UInt]) type.
-     */
+    /** The [Int] (or [UInt]) type. */
     INT(0xFFFF_FFFFU, Int.SIZE_BYTES, Type.INT_TYPE),
 
-    /**
-     * The [Long] (or [ULong]) type.
-     */
-    LONG(0U, Long.SIZE_BYTES, Type.LONG_TYPE);
+    /** The [Long] (or [ULong]) type. */
+    LONG(0xFFFF_FFFFU, Long.SIZE_BYTES, Type.LONG_TYPE);
 
     // Common arithmetic opcodes for every value type.
     val add: Int = this.ty.getOpcode(Opcodes.IADD)

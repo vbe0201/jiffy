@@ -26,18 +26,12 @@ enum class Status(private val mask: Int) {
      */
     FILL_BRANCH_DELAY_SLOT(0b0100),
 
-    /**
-     * Terminates a block without any additional side effects.
-     */
+    /** Terminates a block without any additional side effects. */
     TERMINATE_BLOCK(0b1000);
 
-    /**
-     * Indicates whether the block is still taking more instructions in.
-     */
+    /** Indicates whether the block is still taking more instructions in. */
     fun blockOpen() = (this.mask and 0b0011) != 0
 
-    /**
-     * Indicates whether the next instruction executes in a delay slot.
-     */
+    /** Indicates whether the next instruction executes in any delay slot. */
     fun delaySlot() = (this.mask and 0b0110) != 0
 }

@@ -1,8 +1,6 @@
 package io.github.vbe0201.jiffy.jit.codegen.jvm
 
-/**
- * Condition codes a [Conditional] reacts on.
- */
+/** Condition codes a [Conditional] reacts on. */
 enum class Condition {
     /**
      * Compares two integer operands on the stack and runs a block
@@ -61,17 +59,11 @@ enum class Condition {
     INT_GREATER_THAN_ZERO,
 }
 
-/**
- * Emits conditional code based on a given [Condition] code.
- */
+/** Emits conditional code based on a given [Condition] code. */
 data class Conditional(val cond: Condition) {
-    /**
-     * Codegen callback for when a [Condition] is met.
-     */
+    /** Codegen callback for when a [Condition] is met. */
     var then: (BytecodeEmitter.() -> Unit)? = null
 
-    /**
-     * Optional codegen callback for when a [Condition] failed.
-     */
+    /** Optional codegen callback for when a [Condition] failed. */
     var orElse: (BytecodeEmitter.() -> Unit)? = null
 }

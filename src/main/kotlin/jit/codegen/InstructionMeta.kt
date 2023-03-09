@@ -14,9 +14,7 @@ import io.github.vbe0201.jiffy.jit.decoder.Instruction
  * data at hand for debugging.
  */
 data class InstructionMeta(
-    /**
-     * The raw [Instruction] data to be used during translation.
-     */
+    /** The raw [Instruction] data to be used during translation. */
     val insn: Instruction,
 
     /**
@@ -31,9 +29,7 @@ data class InstructionMeta(
      */
     val pc: UInt,
 
-    /**
-     * This instruction specifically fills the branch delay slot.
-     */
+    /** This instruction specifically fills the branch delay slot. */
     val branchDelaySlot: Boolean,
 ) {
     /**

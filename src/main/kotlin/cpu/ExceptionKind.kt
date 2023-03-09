@@ -1,8 +1,6 @@
 package io.github.vbe0201.jiffy.cpu
 
-/**
- * Exception types which may occur during CPU execution.
- */
+/** Exception types which may occur during CPU execution. */
 enum class ExceptionKind(val raw: UInt) {
     /** An interrupt request was issued. */
     INTERRUPT(0x0U),

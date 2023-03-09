@@ -9,8 +9,6 @@ import io.github.vbe0201.jiffy.jit.state.ExecutionContext
  * built by the translator and loaded as an accessible class at runtime.
  */
 fun interface Compiled {
-    /**
-     * Executes this code block on the given [ExecutionContext].
-     */
+    /** Executes this code block on the given [ExecutionContext]. */
     fun execute(context: ExecutionContext)
 }

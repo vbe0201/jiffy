@@ -131,16 +131,18 @@ value class Operand(val type: JvmType) {
         val mask = this.type.mask.toInt()
 
         // If we want a Long, we have to convert from Int first.
-        // Otherwise, AND will promote any type to Int.
-        return if (new === JvmType.LONG) {
+        if (new === JvmType.LONG) {
             this@BytecodeEmitter.raw.visitInsn(Opcodes.I2L)
+        }
 
-            Operand(new).and {
-                place(mask)
-                raw.visitInsn(Opcodes.I2L)
+        // AND will either promote any type to Int, or, in the
+        // case of Long, the mask must itself be a Long value.
+        return Operand(new).and {
+            place(mask)
+
+            if (this@Operand.type === JvmType.LONG) {
+                this.raw.visitInsn(Opcodes.I2L)
             }
-        } else {
-            Operand(new).and { place(mask) }
         }
     }
 

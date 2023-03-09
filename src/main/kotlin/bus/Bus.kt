@@ -15,7 +15,7 @@ import java.nio.ByteOrder
  */
 class Bus(
     /** The read-only BIOS image buffer. */
-    val bios: ByteBuffer
+    val bios: ByteBuffer,
 ) {
     /** The Random Access Memory buffer. */
     val ram = makeArrayBuffer(MemoryMap.RAM.size, 0xCA.toByte())
@@ -37,10 +37,10 @@ class Bus(
     ): T {
         val masked = maskSegment(addr)
 
-        return if (MemoryMap.RAM.contains(masked)) {
-            this.ram.op(MemoryMap.RAM.makeOffset(masked))
+        if (MemoryMap.RAM.contains(masked)) {
+            return this.ram.op(MemoryMap.RAM.makeOffset(masked))
         } else if (MemoryMap.BIOS.contains(masked)) {
-            this.bios.op(MemoryMap.BIOS.makeOffset(masked))
+            return this.bios.op(MemoryMap.BIOS.makeOffset(masked))
         } else {
             println("read(0x${addr.toString(16)})")
             return default
@@ -58,7 +58,7 @@ class Bus(
         if (MemoryMap.RAM.contains(masked)) {
             this.ram.op(MemoryMap.RAM.makeOffset(masked), value)
         } else {
-            println("read(0x${addr.toString(16)})")
+            println("write(0x${addr.toString(16)})")
         }
     }
 

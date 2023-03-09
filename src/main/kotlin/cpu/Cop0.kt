@@ -27,9 +27,7 @@ class Cop0 {
         }
     }
 
-    /**
-     * Sets the register with the given index to a value.
-     */
+    /** Sets the register with the given index to a value. */
     fun setRegister(index: UInt, value: UInt) {
         when (index) {
             12U -> this.status = StatusRegister(value)

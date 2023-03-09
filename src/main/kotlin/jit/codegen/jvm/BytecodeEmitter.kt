@@ -2,7 +2,6 @@ package io.github.vbe0201.jiffy.jit.codegen.jvm
 
 import io.github.vbe0201.jiffy.cpu.ExceptionKind
 import io.github.vbe0201.jiffy.jit.decoder.Register
-import io.github.vbe0201.jiffy.jit.decoder.ZERO
 import io.github.vbe0201.jiffy.jit.state.ExecutionContext
 import io.github.vbe0201.jiffy.jit.translation.Compiled
 import io.github.vbe0201.jiffy.jit.translation.Compiler
@@ -91,7 +90,7 @@ class BytecodeEmitter {
 
     // The target register of a pending memory load. Loads to
     // `$zero` are always ignored, so that is the default value.
-    private var pendingLoad = ZERO
+    private var pendingLoad = Register.ZERO
 
     /**
      * Finishes the generation of a [Compiled] object and returns
@@ -143,17 +142,15 @@ class BytecodeEmitter {
      */
     fun finishDelayedLoad() {
         val reg = this.pendingLoad
-        if (reg != ZERO) {
-            this.pendingLoad = ZERO
+        if (reg != Register.ZERO) {
+            this.pendingLoad = Register.ZERO
             setGpr(reg) {
                 this.raw.visitVarInsn(ILOAD, DELAYED_LOAD_SLOT)
             }
         }
     }
 
-    /**
-     * Places an integer value on top of the JVM operand stack.
-     */
+    /** Places an integer value on top of the JVM operand stack. */
     inline fun place(value: Int): Operand {
         this.raw.iconst(value)
         return Operand(JvmType.INT)
@@ -437,9 +434,7 @@ class BytecodeEmitter {
         }
     }
 
-    /**
-     * Emits a call to [ExecutionContext.unimplemented].
-     */
+    /** Emits a call to [ExecutionContext.unimplemented]. */
     fun unimplemented() {
         this.raw.run {
             visitVarInsn(ALOAD, 1)

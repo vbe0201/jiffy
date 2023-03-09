@@ -1,8 +1,6 @@
 package io.github.vbe0201.jiffy.jit.decoder
 
-/**
- * Function types which may be selected by [InstructionKind.SPECIAL].
- */
+/** Function types which may be selected by [InstructionKind.SPECIAL]. */
 enum class FunctionKind(val opcode: UByte) {
     SLL(0x0U),
     SRL(0x2U),

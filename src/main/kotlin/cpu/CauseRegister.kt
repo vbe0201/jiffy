@@ -7,6 +7,6 @@ import io.github.vbe0201.jiffy.utils.toUInt
 value class CauseRegister(val raw: UInt) {
     /** Creates a new cause register value encoding an exception. */
     inline fun exception(delayed: Boolean, kind: ExceptionKind): CauseRegister {
-        return CauseRegister((delayed.toUInt() shl 31) or (kind.raw shl 2))
+        return CauseRegister(delayed.toUInt().shl(31).or(kind.raw shl 2))
     }
 }

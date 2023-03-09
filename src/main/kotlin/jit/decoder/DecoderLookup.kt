@@ -148,23 +148,13 @@ private val functionTable = arrayOf(
     null,
 ).also { check(it.size == 64) }
 
-/**
- * Decodes the [InstructionKind] from a given 32-bit instruction.
- *
- * @return The resulting kind, or null for invalid instructions.
- */
+/** Decodes the [InstructionKind] from a given 32-bit instruction, if valid. */
 internal fun decodeKind(insn: UInt): InstructionKind? {
     val opcode = (insn shr 26).toInt()
     return instructionTable[opcode]
 }
 
-/**
- * Decodes the [FunctionKind] from a given 32-bit instruction.
- *
- * The return value will only make sense for [InstructionKind.SPECIAL].
- *
- * @return The resulting kind, or null for invalid instructions.
- */
+/** Decodes the [FunctionKind] from a given 32-bit instruction, if valid. */
 internal fun decodeFunction(insn: UInt): FunctionKind? {
     val opcode = (insn and 0x3FU).toInt()
     return functionTable[opcode]

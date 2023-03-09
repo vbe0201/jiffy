@@ -5,7 +5,7 @@ import io.github.vbe0201.jiffy.jit.codegen.Status
 import io.github.vbe0201.jiffy.jit.codegen.jvm.BytecodeEmitter
 import io.github.vbe0201.jiffy.jit.codegen.jvm.Condition
 import io.github.vbe0201.jiffy.jit.decoder.INSTRUCTION_SIZE
-import io.github.vbe0201.jiffy.jit.decoder.RA
+import io.github.vbe0201.jiffy.jit.decoder.Register
 import io.github.vbe0201.jiffy.utils.*
 
 // Local variable slots in the generated function; temporarily
@@ -20,7 +20,7 @@ private inline fun computeBranchTarget(pc: UInt, target: UShort): Int {
 private inline fun branchConditional(
     cond: Condition,
     meta: InstructionMeta,
-    emitter: BytecodeEmitter
+    emitter: BytecodeEmitter,
 ) {
     emitter.conditional(cond) {
         // When the condition is fulfilled, branch to the target.
@@ -67,7 +67,7 @@ fun b(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
 
         // Store the return address in `$ra`, if requested.
         if (link) {
-            setGpr(RA) { place((meta.pc + INSTRUCTION_SIZE).toInt()) }
+            setGpr(Register.RA) { place((meta.pc + INSTRUCTION_SIZE).toInt()) }
         }
 
         // Branch when requested.
@@ -81,7 +81,7 @@ fun b(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
 /** Generates the Jump And Link (JAL) instruction to the code buffer. */
 fun jal(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     // Store the return address in the `$ra` register.
-    emitter.setGpr(RA) {
+    emitter.setGpr(Register.RA) {
         place((meta.pc + INSTRUCTION_SIZE).toInt())
     }
 
