@@ -3,7 +3,7 @@ package io.github.vbe0201.jiffy.jit.decoder
 /**
  * The amount of bytes an [Instruction] consumes.
  */
-const val INSTRUCTION_SIZE = 4U
+const val INSTRUCTION_SIZE = 4U // Int.SIZE_BYTES.toUInt()
 
 /**
  * Representation of a 32-bit MIPS instruction.

@@ -37,9 +37,7 @@ private inline fun branchConditional(
     }
 }
 
-/**
- * Generates the Jump (J) instruction to the code buffer.
- */
+/** Generates the Jump (J) instruction to the code buffer. */
 fun j(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     emitter.jump {
         val offset = meta.insn.target() shl 2
@@ -51,9 +49,7 @@ fun j(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     return Status.FILL_BRANCH_DELAY_SLOT
 }
 
-/**
- * Emits a conditional branch instruction (Bxx) to the code buffer.
- */
+/** Emits a conditional branch instruction (Bxx) to the code buffer. */
 fun b(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     val cond = (meta.insn.raw shr 16) and 1U
     val link = (meta.insn.raw shr 17) and 0xFU == 8U
@@ -82,9 +78,7 @@ fun b(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     return Status.FILL_BRANCH_DELAY_SLOT
 }
 
-/**
- * Generates the Jump And Link (JAL) instruction to the code buffer.
- */
+/** Generates the Jump And Link (JAL) instruction to the code buffer. */
 fun jal(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     // Store the return address in the `$ra` register.
     emitter.setGpr(RA) {
@@ -115,9 +109,7 @@ fun jalr(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     return Status.FILL_BRANCH_DELAY_SLOT
 }
 
-/**
- * Generates the Jump Register (JR) instruction to the code buffer.
- */
+/** Generates the Jump Register (JR) instruction to the code buffer. */
 fun jr(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     // Jump to the destination register.
     emitter.jump {
@@ -127,9 +119,7 @@ fun jr(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     return Status.FILL_BRANCH_DELAY_SLOT
 }
 
-/**
- * Generates the Branch Equal (BEQ) instruction to the code buffer.
- */
+/** Generates the Branch Equal (BEQ) instruction to the code buffer. */
 fun beq(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     emitter.run {
         getGpr(meta.insn.rs())
@@ -140,9 +130,7 @@ fun beq(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     return Status.FILL_BRANCH_DELAY_SLOT
 }
 
-/**
- * Generates the Branch Not Equal (BNE) instruction to the code buffer.
- */
+/** Generates the Branch Not Equal (BNE) instruction to the code buffer. */
 fun bne(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     emitter.run {
         getGpr(meta.insn.rs())

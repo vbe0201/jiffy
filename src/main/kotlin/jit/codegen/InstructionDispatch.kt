@@ -119,7 +119,7 @@ private val functionTable = arrayOf(
     ::unimplemented,
     ::unimplemented,
     ::syscall,
-    ::unimplemented,
+    ::`break`,
     ::unimplemented,
     ::unimplemented,
 
@@ -132,7 +132,7 @@ private val functionTable = arrayOf(
     ::unimplemented,
     ::unimplemented,
 
-    ::unimplemented,
+    ::mult,
     ::multu,
     ::div,
     ::divu,

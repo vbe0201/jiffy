@@ -39,9 +39,7 @@ private inline fun storeMemory(
     }
 }
 
-/**
- * Generates the Load Byte (LB) instruction to the code buffer.
- */
+/** Generates the Load Byte (LB) instruction to the code buffer. */
 fun lb(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     emitter.run {
         configureDelayedLoad(
@@ -68,9 +66,7 @@ fun lbu(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     return Status.FILL_LOAD_DELAY_SLOT
 }
 
-/**
- * Generates the Load Halfword (LH) instruction to the code buffer.
- */
+/** Generates the Load Halfword (LH) instruction to the code buffer. */
 fun lh(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     emitter.run {
         configureDelayedLoad(
@@ -97,9 +93,7 @@ fun lhu(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     return Status.FILL_LOAD_DELAY_SLOT
 }
 
-/**
- * Generates the Load Word (LW) instruction to the code buffer.
- */
+/** Generates the Load Word (LW) instruction to the code buffer. */
 fun lw(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     emitter.configureDelayedLoad(
         meta.insn.rt(),
@@ -109,9 +103,7 @@ fun lw(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     return Status.FILL_LOAD_DELAY_SLOT
 }
 
-/**
- * Generates the Store Byte (SB) instruction to the code buffer.
- */
+/** Generates the Store Byte (SB) instruction to the code buffer. */
 fun sb(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     storeMemory(meta, emitter) {
         getGpr(meta.insn.rt()).truncate(JvmType.BYTE)
@@ -120,9 +112,7 @@ fun sb(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     return Status.CONTINUE_BLOCK
 }
 
-/**
- * Generates the Store Halfword (SH) instruction to the code buffer.
- */
+/** Generates the Store Halfword (SH) instruction to the code buffer. */
 fun sh(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     storeMemory(meta, emitter) {
         getGpr(meta.insn.rt()).truncate(JvmType.SHORT)
@@ -131,9 +121,7 @@ fun sh(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     return Status.CONTINUE_BLOCK
 }
 
-/**
- * Generates the Store Word (SW) instruction to the code buffer.
- */
+/** Generates the Store Word (SW) instruction to the code buffer. */
 fun sw(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     storeMemory(meta, emitter) {
         getGpr(meta.insn.rt())

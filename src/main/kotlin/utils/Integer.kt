@@ -1,17 +1,9 @@
 package io.github.vbe0201.jiffy.utils
 
-/**
- * Converts a [Boolean] to the equivalent [Int] value.
- *
- * true becomes 1, false becomes 0.
- */
+/** Converts a [Boolean] to the equivalent [Int] value. */
 inline fun Boolean.toInt() = if (this) 1 else 0
 
-/**
- * Converts a [Boolean] to the equivalent [UInt] value.
- *
- * true becomes 1, false becomes 0.
- */
+/** Converts a [Boolean] to the equivalent [UInt] value. */
 inline fun Boolean.toUInt() = this.toInt().toUInt()
 
 /**

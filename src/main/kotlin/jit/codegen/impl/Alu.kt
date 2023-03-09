@@ -1,5 +1,6 @@
 package io.github.vbe0201.jiffy.jit.codegen.impl
 
+import io.github.vbe0201.jiffy.cpu.ExceptionKind
 import io.github.vbe0201.jiffy.jit.codegen.InstructionMeta
 import io.github.vbe0201.jiffy.jit.codegen.Status
 import io.github.vbe0201.jiffy.jit.codegen.jvm.BytecodeEmitter
@@ -35,7 +36,11 @@ private inline fun checkedAdd(
         conditional(Condition.INT_SMALLER_THAN_ZERO) {
             then = {
                 // Generate an overflow CPU exception.
-                exception(meta.exceptionPc(), meta.branchDelaySlot, "OVERFLOW")
+                exception(
+                    meta.exceptionPc(),
+                    meta.branchDelaySlot,
+                    ExceptionKind.OVERFLOW
+                )
             }
 
             orElse = {
@@ -54,7 +59,7 @@ private inline fun checkedSub(
     emitter: BytecodeEmitter,
     out: Register,
     a: BytecodeEmitter.() -> Operand,
-    b: BytecodeEmitter.() -> Operand
+    b: BytecodeEmitter.() -> Operand,
 ) {
     emitter.run {
         // Evaluate the result of the subtraction and back it up.
@@ -69,7 +74,11 @@ private inline fun checkedSub(
         conditional(Condition.INT_SMALLER_THAN_ZERO) {
             then = {
                 // Generate an overflow CPU exception.
-                exception(meta.exceptionPc(), meta.branchDelaySlot, "OVERFLOW")
+                exception(
+                    meta.exceptionPc(),
+                    meta.branchDelaySlot,
+                    ExceptionKind.OVERFLOW
+                )
             }
 
             orElse = {
@@ -97,9 +106,7 @@ fun addiu(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     return Status.CONTINUE_BLOCK
 }
 
-/**
- * Generates the Add instruction to the code buffer.
- */
+/** Generates the Add instruction to the code buffer. */
 fun add(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     checkedAdd(
         meta,
@@ -112,9 +119,7 @@ fun add(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     return Status.CONTINUE_BLOCK
 }
 
-/**
- * Generates the Add Immediate (ADDI) instruction to the code buffer.
- */
+/** Generates the Add Immediate (ADDI) instruction to the code buffer. */
 fun addi(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     checkedAdd(
         meta,
@@ -140,9 +145,7 @@ fun addu(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     return Status.CONTINUE_BLOCK
 }
 
-/**
- * Generates the Subtract (SUB) instruction to the code buffer.
- */
+/** Generates the Subtract (SUB) instruction to the code buffer. */
 fun sub(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     checkedSub(
         meta,
@@ -193,9 +196,7 @@ fun andi(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     return Status.CONTINUE_BLOCK
 }
 
-/**
- * Generates the OR Immediate (ORI) instruction to the code buffer.
- */
+/** Generates the OR Immediate (ORI) instruction to the code buffer. */
 fun ori(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     emitter.setGpr(meta.insn.rt()) {
         getGpr(meta.insn.rs())
@@ -205,9 +206,7 @@ fun ori(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     return Status.CONTINUE_BLOCK
 }
 
-/**
- * Generates the XOR Immediate (XORI) instruction to the code buffer.
- */
+/** Generates the XOR Immediate (XORI) instruction to the code buffer. */
 fun xori(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     emitter.setGpr(meta.insn.rt()) {
         getGpr(meta.insn.rs())
@@ -217,9 +216,7 @@ fun xori(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     return Status.CONTINUE_BLOCK
 }
 
-/**
- * Generates the AND instruction to the code buffer.
- */
+/** Generates the AND instruction to the code buffer. */
 fun and(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     emitter.setGpr(meta.insn.rd()) {
         getGpr(meta.insn.rs())
@@ -229,9 +226,7 @@ fun and(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     return Status.CONTINUE_BLOCK
 }
 
-/**
- * Generates the XOR instruction to the code buffer.
- */
+/** Generates the XOR instruction to the code buffer. */
 fun or(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     emitter.setGpr(meta.insn.rd()) {
         getGpr(meta.insn.rs())
@@ -241,9 +236,7 @@ fun or(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     return Status.CONTINUE_BLOCK
 }
 
-/**
- * Generates the XOR instruction to the code buffer.
- */
+/** Generates the XOR instruction to the code buffer. */
 fun xor(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     emitter.setGpr(meta.insn.rd()) {
         getGpr(meta.insn.rs())
@@ -253,9 +246,7 @@ fun xor(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     return Status.CONTINUE_BLOCK
 }
 
-/**
- * Generates the NOT OR (NOR) instruction to the code buffer.
- */
+/** Generates the NOT OR (NOR) instruction to the code buffer. */
 fun nor(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     emitter.setGpr(meta.insn.rd()) {
         // Bitwise OR both registers together and compute
@@ -424,15 +415,13 @@ fun sltu(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     return Status.CONTINUE_BLOCK
 }
 
-/**
- * Generates the Multiply (MULT) instruction to the code buffer.
- */
+/** Generates the Multiply (MULT) instruction to the code buffer. */
 fun mult(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     emitter.run {
         // Perform signed multiplication of input registers.
         val result = getGpr(meta.insn.rs()).signExtend(JvmType.LONG)
             .mult { getGpr(meta.insn.rt()).signExtend(JvmType.LONG) }
-            //.storeLocal(TEMP_MUL_SLOT)
+            .storeLocal(TEMP_MUL_SLOT)
 
         // Set the HI register to the high 32 bits of the result.
         setHigh {
@@ -477,9 +466,7 @@ fun multu(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     return Status.CONTINUE_BLOCK
 }
 
-/**
- * Generates the Divide (DIV) instruction to the code buffer.
- */
+/** Generates the Divide (DIV) instruction to the code buffer. */
 fun div(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     val rs = meta.insn.rs()
     val rt = meta.insn.rt()
@@ -539,9 +526,7 @@ fun divu(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     return Status.CONTINUE_BLOCK
 }
 
-/**
- * Generates Move From LO (MFLO) instruction to the code buffer.
- */
+/** Generates Move From LO (MFLO) instruction to the code buffer. */
 fun mflo(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     emitter.setGpr(meta.insn.rd()) {
         getLow()
@@ -550,9 +535,7 @@ fun mflo(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     return Status.CONTINUE_BLOCK
 }
 
-/**
- * Generates the Move From HI (MFHI) instruction to the code buffer.
- */
+/** Generates the Move From HI (MFHI) instruction to the code buffer. */
 fun mfhi(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     emitter.setGpr(meta.insn.rd()) {
         getHigh()
@@ -561,9 +544,7 @@ fun mfhi(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     return Status.CONTINUE_BLOCK
 }
 
-/**
- * Generates the Move To LO (MTLO) instruction to the code buffer.
- */
+/** Generates the Move To LO (MTLO) instruction to the code buffer. */
 fun mtlo(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     emitter.setLow {
         getGpr(meta.insn.rs())
@@ -572,9 +553,7 @@ fun mtlo(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     return Status.CONTINUE_BLOCK
 }
 
-/**
- * Generates the Move To HI (MTHI) instruction to the code buffer.
- */
+/** Generates the Move To HI (MTHI) instruction to the code buffer. */
 fun mthi(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     emitter.setHigh {
         getGpr(meta.insn.rs())

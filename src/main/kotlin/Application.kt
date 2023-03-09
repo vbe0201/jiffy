@@ -1,6 +1,6 @@
 package io.github.vbe0201.jiffy
 
-import io.github.vbe0201.jiffy.cpu.Bus
+import io.github.vbe0201.jiffy.bus.Bus
 import io.github.vbe0201.jiffy.cpu.Cop0
 import io.github.vbe0201.jiffy.jit.state.ExecutionContext
 import io.github.vbe0201.jiffy.jit.translation.Translator

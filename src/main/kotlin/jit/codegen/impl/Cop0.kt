@@ -53,6 +53,6 @@ fun rfe(
 ): Status {
     // TODO: Check for unsupported virtual memory instructions?
 
-    emitter.restoreAfterException()
+    emitter.leaveException()
     return Status.CONTINUE_BLOCK
 }

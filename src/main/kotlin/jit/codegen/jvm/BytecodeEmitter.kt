@@ -243,7 +243,7 @@ class BytecodeEmitter {
         pc: UInt,
         delayed: Boolean,
         res: JvmType,
-        op: BytecodeEmitter.() -> Unit
+        op: BytecodeEmitter.() -> Unit,
     ): Operand {
         this.raw.run {
             visitVarInsn(ALOAD, 1)
@@ -258,7 +258,7 @@ class BytecodeEmitter {
             conditional(Condition.INT_NOT_ZERO) {
                 then = {
                     pop()
-                    exception(pc, delayed, "UNALIGNED_LOAD")
+                    exception(pc, delayed, ExceptionKind.UNALIGNED_LOAD)
                 }
             }
 
@@ -268,8 +268,6 @@ class BytecodeEmitter {
                 JvmType.INT -> contextCall("read32", "(I)I")
                 JvmType.LONG -> throw AssertionError()
             }
-
-            // TODO: Unaligned load exception handling.
         }
 
         return Operand(res)
@@ -288,7 +286,7 @@ class BytecodeEmitter {
     fun writeBus(
         pc: UInt,
         delayed: Boolean,
-        op: BytecodeEmitter.() -> Operand
+        op: BytecodeEmitter.() -> Operand,
     ) {
         this.raw.run {
             visitVarInsn(ALOAD, 1)
@@ -303,7 +301,7 @@ class BytecodeEmitter {
             conditional(Condition.INT_NOT_ZERO) {
                 then = {
                     pop()
-                    exception(pc, delayed, "UNALIGNED_STORE")
+                    exception(pc, delayed, ExceptionKind.UNALIGNED_STORE)
                 }
             }
 
@@ -314,8 +312,6 @@ class BytecodeEmitter {
                 JvmType.INT -> contextCall("write32", "(II)V")
                 JvmType.LONG -> throw AssertionError()
             }
-
-            // TODO: Unaligned write exception handling.
         }
     }
 
@@ -455,16 +451,16 @@ class BytecodeEmitter {
      * Emits a call to [ExecutionContext.raiseException] and
      * prematurely returns from the current block.
      */
-    fun exception(pc: UInt, delayed: Boolean, kind: String) {
+    fun exception(pc: UInt, delayed: Boolean, kind: ExceptionKind) {
         this.raw.run {
             visitVarInsn(ALOAD, 1)
             iconst(pc.toInt())
             visitInsn(ICONST_0 + delayed.toInt())
-            getstatic(exceptionKindEnum, kind, "L$exceptionKindEnum;")
+            getstatic(exceptionKindEnum, kind.name, "L$exceptionKindEnum;")
             contextCall("raiseException", "(IZL$exceptionKindEnum;)V")
 
-            // After an exception was raised, return from the block.
-            // We want to run exception handler code immediately.
+            // After an exception was raised, return from the current block
+            // to run exception handler code immediately in the next block.
             visitInsn(RETURN)
         }
     }
@@ -473,10 +469,10 @@ class BytecodeEmitter {
      * Emits a call to [ExecutionContext.restoreAfterException]
      * to leave exceptional state.
      */
-    fun restoreAfterException() {
+    fun leaveException() {
         this.raw.run {
             visitVarInsn(ALOAD, 1)
-            contextCall("restoreAfterException", "()V")
+            contextCall("leaveException", "()V")
         }
     }
 }

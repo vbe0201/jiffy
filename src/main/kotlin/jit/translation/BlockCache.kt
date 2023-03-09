@@ -107,25 +107,25 @@ class BlockCache {
         return list
     }
 
-    private fun colorOf(node: BlockNode?): Boolean {
+    private inline fun colorOf(node: BlockNode?): Boolean {
         return node == null || node.color
     }
 
-    private fun setColor(node: BlockNode?, color: Boolean) {
+    private inline fun setColor(node: BlockNode?, color: Boolean) {
         if (node != null) {
             node.color = color
         }
     }
 
-    private fun leftOf(node: BlockNode?): BlockNode? {
+    private inline fun leftOf(node: BlockNode?): BlockNode? {
         return node?.left
     }
 
-    private fun rightOf(node: BlockNode?): BlockNode? {
+    private inline fun rightOf(node: BlockNode?): BlockNode? {
         return node?.right
     }
 
-    private fun parentOf(node: BlockNode?): BlockNode? {
+    private inline fun parentOf(node: BlockNode?): BlockNode? {
         return node?.parent
     }
 
@@ -298,7 +298,7 @@ class BlockCache {
         return 1U
     }
 
-    private fun maximum(node: BlockNode): BlockNode {
+    private inline fun maximum(node: BlockNode): BlockNode {
         var ptr = node
         while (ptr.right != null) {
             ptr = ptr.right!!

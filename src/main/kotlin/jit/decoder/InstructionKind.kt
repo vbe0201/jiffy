@@ -1,8 +1,6 @@
 package io.github.vbe0201.jiffy.jit.decoder
 
-/**
- * Supported instruction types in the MIPS I ISA.
- */
+/** Supported instruction types in the MIPS I ISA. */
 enum class InstructionKind(val opcode: UByte) {
     SPECIAL(0x0U),
     B(0x1U),
