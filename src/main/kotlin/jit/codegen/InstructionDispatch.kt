@@ -3,7 +3,6 @@ package io.github.vbe0201.jiffy.jit.codegen
 import io.github.vbe0201.jiffy.cpu.ExceptionKind
 import io.github.vbe0201.jiffy.jit.codegen.impl.*
 import io.github.vbe0201.jiffy.jit.codegen.jvm.BytecodeEmitter
-import kotlin.system.exitProcess
 
 /**
  * Dispatches an [InstructionMeta] to its translation routine.
@@ -31,8 +30,16 @@ private fun dispatchFunction(
     meta: InstructionMeta,
     emitter: BytecodeEmitter,
 ): Status {
-    // TODO: Figure out a mroe elegant way to handle invalid instructions.
-    val func = meta.insn.function() ?: exitProcess(1)
+    // Identify the next instruction or generate an exception.
+    val func = meta.insn.function()
+    if (func == null) {
+        emitter.exception(
+            meta.exceptionPc(),
+            meta.branchDelaySlot,
+            ExceptionKind.ILLEGAL_INSTRUCTION
+        )
+        return Status.TERMINATE_BLOCK
+    }
 
     // Delegate to the corresponding entry in the functions table.
     val handler = functionTable[func.opcode.toInt()]
