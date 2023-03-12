@@ -4,6 +4,7 @@ import io.github.vbe0201.jiffy.memory.MemoryMap
 import io.github.vbe0201.jiffy.memory.MemoryRange
 import io.github.vbe0201.jiffy.memory.Peripheral
 import io.github.vbe0201.jiffy.utils.alignDown
+import io.github.vbe0201.jiffy.utils.getUInt
 import io.github.vbe0201.jiffy.utils.putUInt
 import java.nio.ByteBuffer
 
@@ -118,9 +119,44 @@ class DmaEngine(private val ram: ByteBuffer) : Peripheral {
         }
     }
 
+    private fun performLinkedListTransfer(channel: Channel) {
+        // Make sure we are transferring in the correct direction.
+        if (channel.direction() === TransferDirection.TO_RAM) {
+            throw RuntimeException("invalid DMA direction for LL mode")
+        }
+
+        var address = this.maskAddress(channel.baseAddress)
+
+        while (true) {
+            // In linked list mode, each entry starts with a header.
+            // The highest byte contains the words in a "packet".
+            val header = this.ram.getUInt(address.toInt())
+
+            var remaining = header shr 24
+            while (remaining > 0U) {
+                address = this.maskAddress(address + WORD.toUInt())
+
+                val command = this.ram.getUInt(address.toInt())
+                println("GPU command: 0x${command.toString(16)}")
+                // TODO: Send command here.
+
+                --remaining
+            }
+
+            // XXX: The end-of-table marker is usually 0x00FF_FFFF
+            // but the hardware supposedly only checks for the MSB.
+            if (header.and(0x0080_0000U) != 0U) {
+                break;
+            }
+
+            address = this.maskAddress(header)
+        }
+    }
+
     private fun performTransfer(channel: Channel) {
         when (channel.sync()) {
             SyncMode.MANUAL -> this.performBlockTransfer(channel)
+            SyncMode.LINKED_LIST -> this.performLinkedListTransfer(channel)
 
             else -> TODO("other DMA modes not yet implemented")
         }
