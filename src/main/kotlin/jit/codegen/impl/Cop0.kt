@@ -3,6 +3,7 @@ package io.github.vbe0201.jiffy.jit.codegen.impl
 import io.github.vbe0201.jiffy.jit.codegen.InstructionMeta
 import io.github.vbe0201.jiffy.jit.codegen.Status
 import io.github.vbe0201.jiffy.jit.codegen.jvm.BytecodeEmitter
+import io.github.vbe0201.jiffy.jit.jitLogger
 
 internal fun cop0(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
     return when (val op = meta.insn.copOpcode()) {
@@ -12,7 +13,7 @@ internal fun cop0(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
 
         // TODO: Figure out a better way to handle invalid instructions.
         else -> {
-            println("Unimplemented coprocessor instruction: $op")
+            jitLogger.error { "Unimplemented coprocessor instruction: $op" }
             return unimplemented(meta, emitter)
         }
     }
@@ -49,7 +50,7 @@ fun mtc0(meta: InstructionMeta, emitter: BytecodeEmitter): Status {
  */
 fun rfe(
     @Suppress("UNUSED_PARAMETER") meta: InstructionMeta,
-    emitter: BytecodeEmitter
+    emitter: BytecodeEmitter,
 ): Status {
     // TODO: Check for unsupported virtual memory instructions?
 

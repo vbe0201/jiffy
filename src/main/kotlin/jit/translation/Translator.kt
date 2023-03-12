@@ -1,9 +1,11 @@
 package io.github.vbe0201.jiffy.jit.translation
 
+import io.github.oshai.KotlinLogging
 import io.github.vbe0201.jiffy.cpu.ExceptionKind
 import io.github.vbe0201.jiffy.jit.codegen.BlockBuilder
 import io.github.vbe0201.jiffy.jit.codegen.jvm.BytecodeEmitter
 import io.github.vbe0201.jiffy.jit.decoder.INSTRUCTION_SIZE
+import io.github.vbe0201.jiffy.jit.jitLogger
 import io.github.vbe0201.jiffy.jit.state.ExecutionContext
 import io.github.vbe0201.jiffy.jit.state.State
 import io.github.vbe0201.jiffy.utils.isAligned
@@ -42,6 +44,10 @@ class Translator {
                 )
             }
 
+            jitLogger.debug {
+                "Executing next block from 0x${context.pc.toString(16)}"
+            }
+
             // Find or translate the next code block and execute it.
             val block = findOrCompileBlock(context, context.pc)
             block.code.execute(context)
@@ -52,6 +58,10 @@ class Translator {
         var block = this.cache.get(addr)
 
         if (block == null) {
+            jitLogger.debug {
+                "Cache miss; recompiling block at 0x${addr.toString(16)}"
+            }
+
             block = compileBlock(ctx, addr)
             this.cache.insert(block)
         }

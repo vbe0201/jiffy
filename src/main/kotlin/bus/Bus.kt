@@ -1,5 +1,6 @@
 package io.github.vbe0201.jiffy.bus
 
+import io.github.oshai.KotlinLogging
 import io.github.vbe0201.jiffy.dma.DmaEngine
 import io.github.vbe0201.jiffy.jit.decoder.Instruction
 import io.github.vbe0201.jiffy.memory.MemoryMap
@@ -7,6 +8,9 @@ import io.github.vbe0201.jiffy.memory.maskSegment
 import io.github.vbe0201.jiffy.utils.*
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+
+@PublishedApi
+internal val logger = KotlinLogging.logger("Bus")
 
 /**
  * The memory bus for the PSX CPU block.
@@ -46,7 +50,7 @@ class Bus(
         } else if (MemoryMap.BIOS.contains(masked)) {
             return this.bios.op(MemoryMap.BIOS.makeOffset(masked))
         } else {
-            println("read(0x${addr.toString(16)})")
+            logger.debug { "read(0x${addr.toString(16)})" }
             return default
         }
     }
@@ -62,7 +66,7 @@ class Bus(
         if (MemoryMap.RAM.contains(masked)) {
             this.ram.op(MemoryMap.RAM.makeOffset(masked), value)
         } else {
-            println("write(0x${addr.toString(16)})")
+            logger.debug { "write(0x${addr.toString(16)})" }
         }
     }
 

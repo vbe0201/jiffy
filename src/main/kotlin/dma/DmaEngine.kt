@@ -1,5 +1,6 @@
 package io.github.vbe0201.jiffy.dma
 
+import io.github.oshai.KotlinLogging
 import io.github.vbe0201.jiffy.memory.MemoryMap
 import io.github.vbe0201.jiffy.memory.MemoryRange
 import io.github.vbe0201.jiffy.memory.Peripheral
@@ -13,6 +14,8 @@ private const val WORD = UInt.SIZE_BYTES
 
 // XXX: Taken from Nocash PSXSPX PlayStation specifications.
 private const val DPCR_RESET_VALUE = 0x0765_4321U
+
+private val logger = KotlinLogging.logger("Dma")
 
 /**
  * Implementation of the PSX Direct Memory Access Engine.
@@ -127,6 +130,10 @@ class DmaEngine(private val ram: ByteBuffer) : Peripheral {
 
         var address = this.maskAddress(channel.baseAddress)
 
+        logger.debug {
+            "Performing Linked List transfer from RAM 0x${address.toString(16)}"
+        }
+
         while (true) {
             // In linked list mode, each entry starts with a header.
             // The highest byte contains the words in a "packet".
@@ -137,7 +144,7 @@ class DmaEngine(private val ram: ByteBuffer) : Peripheral {
                 address = this.maskAddress(address + WORD.toUInt())
 
                 val command = this.ram.getUInt(address.toInt())
-                println("GPU command: 0x${command.toString(16)}")
+                logger.debug { "GPU command: 0x${command.toString(16)}" }
                 // TODO: Send command here.
 
                 --remaining
