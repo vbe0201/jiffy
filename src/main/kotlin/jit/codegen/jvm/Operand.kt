@@ -140,7 +140,7 @@ value class Operand(val type: JvmType) {
         return Operand(new).and {
             place(mask)
 
-            if (this@Operand.type === JvmType.LONG) {
+            if (new === JvmType.LONG) {
                 this.raw.visitInsn(Opcodes.I2L)
             }
         }

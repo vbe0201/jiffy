@@ -1,5 +1,6 @@
 package io.github.vbe0201.jiffy.bus
 
+import io.github.vbe0201.jiffy.dma.DmaEngine
 import io.github.vbe0201.jiffy.jit.decoder.Instruction
 import io.github.vbe0201.jiffy.memory.MemoryMap
 import io.github.vbe0201.jiffy.memory.maskSegment
@@ -19,6 +20,9 @@ class Bus(
 ) {
     /** The Random Access Memory buffer. */
     val ram = makeArrayBuffer(MemoryMap.RAM.size, 0xCA.toByte())
+
+    /** The [DmaEngine] peripheral. */
+    val dma = DmaEngine(this.ram)
 
     // Configure all memory accesses to be in little-endian byte order
     // and make sure that we get a BIOS image of the expected size.
@@ -74,7 +78,19 @@ class Bus(
 
     /** Reads a value from the given address through the bus. */
     fun read32(addr: UInt): UInt {
-        return this.read(addr, ByteBuffer::getUInt, 0U)
+        if (MemoryMap.DMA.contains(addr)) {
+            return this.dma.read32(MemoryMap.DMA.makeOffset(addr))
+        } else if (MemoryMap.GPU.contains(addr)) {
+            return when (MemoryMap.GPU.makeOffset(addr)) {
+                // HACK: Set bits 26, 27, 28 to signal that the GPU
+                // is ready for DMA and CPU access. This avoids the
+                // BIOS deadlocks when polling on this register.
+                4 -> 0x1C00_0000U
+                else -> 0U
+            }
+        } else {
+            return this.read(addr, ByteBuffer::getUInt, 0U)
+        }
     }
 
     /** Writes a [value] to the given address through the bus. */
@@ -89,7 +105,11 @@ class Bus(
 
     /** Writes a [value] to the given address through the bus. */
     fun write32(addr: UInt, value: UInt) {
-        this.write(addr, ByteBuffer::putUInt, value)
+        if (MemoryMap.DMA.contains(addr)) {
+            this.dma.write32(MemoryMap.DMA.makeOffset(addr), value)
+        } else {
+            this.write(addr, ByteBuffer::putUInt, value)
+        }
     }
 
     /** Reads an [Instruction] from the given memory address. */

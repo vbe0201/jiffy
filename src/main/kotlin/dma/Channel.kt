@@ -9,15 +9,29 @@ package io.github.vbe0201.jiffy.dma
  * transfer between peripherals.
  */
 class Channel(
-    private val channelControl: UInt,
-    private val blockControl: UInt,
+    /** The DMA [Port] associated with the channel. */
+    val port: Port,
+    /** The channel control register of the [Channel]. */
+    var channelControl: UInt,
+    /** The block control register of the [Channel]. */
+    var blockControl: UInt,
 ) {
+    /** Constructs a DMA channel in its empty state. */
+    constructor(port: Port) : this(port, 0U, 0U)
+
     /** The 24-bit base address this DMA channel is configured to. */
     var baseAddress = 0U
         set(addr) {
             // Truncate address to reachable range.
             field = addr and 0x00FF_FFFFU
         }
+
+    /** Puts the channel back into reset state. */
+    fun reset() {
+        this.channelControl = 0U
+        this.blockControl = 0U
+        this.baseAddress = 0U
+    }
 
     /** Gets the [TransferDirection] configured on this channel. */
     fun direction(): TransferDirection {
@@ -39,7 +53,7 @@ class Channel(
 
     /** Gets the [SyncMode] configured on this channel. */
     fun sync(): SyncMode {
-        return when (this.channelControl.and(3U shl 9)) {
+        return when (this.channelControl.shr(9).and(0x3U)) {
             0U -> SyncMode.MANUAL
             1U -> SyncMode.REQUEST
             2U -> SyncMode.LINKED_LIST
@@ -80,5 +94,12 @@ class Channel(
 
             else -> throw AssertionError("invalid DMA sync mode")
         }
+    }
+
+    /** Updates the state of this channel when a DMA transfer is finished. */
+    fun finishTransfer() {
+        // Clear 'enable' and 'trigger' bits on channel control.
+        val mask = (1U shl 24).and(1U shl 28)
+        this.channelControl = this.channelControl.and(mask.inv())
     }
 }
