@@ -64,11 +64,11 @@ class Channel(
 
     /** Indicates whether a DMA transfer is currently active. */
     fun active(): Boolean {
-        val enable = this.channelControl.and(1U shl 24)
+        val enable = this.channelControl.shr(24).and(1U)
 
         return when (this.sync()) {
             SyncMode.MANUAL -> {
-                val trigger = this.channelControl.and(1U shl 28)
+                val trigger = this.channelControl.shr(28).and(1U)
                 enable.and(trigger) != 0U
             }
 
@@ -99,7 +99,7 @@ class Channel(
     /** Updates the state of this channel when a DMA transfer is finished. */
     fun finishTransfer() {
         // Clear 'enable' and 'trigger' bits on channel control.
-        val mask = (1U shl 24).and(1U shl 28)
+        val mask = (1U shl 24) or (1U shl 28)
         this.channelControl = this.channelControl.and(mask.inv())
     }
 }
