@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.8.10"
+    kotlin("jvm") version "1.8.21"
     application
 }
 
@@ -13,8 +13,9 @@ repositories {
 }
 
 dependencies {
+    runtimeOnly("ch.qos.logback:logback-classic:1.4.6")
     implementation("io.github.oshai:kotlin-logging-jvm:4.0.0-beta-23")
-    runtimeOnly("ch.qos.logback:logback-classic:1.4.5")
+    implementation("org.slf4j:slf4j-api:2.0.7")
 
     implementation("org.ow2.asm:asm:9.4")
     implementation("org.ow2.asm:asm-commons:9.4")
@@ -38,5 +39,5 @@ kotlin {
 }
 
 application {
-    mainClass.set("MainKt")
+    mainClass.set("ApplicationKt")
 }
