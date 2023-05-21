@@ -73,8 +73,13 @@ tasks {
 
 kotlin {
     jvmToolchain(19)
+     sourceSets.all {
+         languageSettings {
+             languageVersion = "2.0"
+         }
+     }
 }
 
 application {
-    mainClass.set("ApplicationKt")
+    mainClass.set("io.github.vbe0201.jiffy.ApplicationKt")
 }
